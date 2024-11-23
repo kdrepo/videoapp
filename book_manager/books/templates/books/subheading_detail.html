@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subheading.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container my-5">
+    <h1>{{ subheading.title }}</h1>
+
+    <!-- Subheading Text -->
+    {% if subheading.text %}
+        <div class="mt-4">
+            <p>{{ subheading.text }}</p>
+        </div>
+    {% endif %}
+
+  <!-- YouTube Links -->
+{% if subheading.youtube_links.exists %} <!-- Check if links exist -->
+<h3 class="mt-4">YouTube Links</h3>
+<ul>
+    {% for link in subheading.youtube_links.all %}
+        <li>
+            <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+    <!-- Back to Table of Contents -->
+    <a href="{% url 'table_of_contents' %}" class="btn btn-secondary mt-4">Back to Table of Contents</a>
+</div>
+</body>
+</html>

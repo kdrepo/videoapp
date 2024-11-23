@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table of Contents</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-5">
+        <h1>Table of Contents</h1>
+        <div class="accordion" id="bookAccordion">
+            {% for book in books %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-book-{{ book.id }}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-book-{{ book.id }}" aria-expanded="true" aria-controls="collapse-book-{{ book.id }}">
+                        {{ book.title }}
+                    </button>
+                </h2>
+                <div id="collapse-book-{{ book.id }}" class="accordion-collapse collapse" aria-labelledby="heading-book-{{ book.id }}" data-bs-parent="#bookAccordion">
+                    <div class="accordion-body">
+                        {% for chapter in book.chapters.all %}
+                        <div class="ms-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    {% if chapter.text %}
+                                    <a href="{% url 'chapter_detail' chapter.id %}">{{ chapter.title }}</a>
+                                    {% else %}
+                                    {{ chapter.title }}
+                                    {% endif %}
+                                </h5>
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-chapter-{{ chapter.id }}" aria-expanded="false" aria-controls="collapse-chapter-{{ chapter.id }}">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="collapse mt-2" id="collapse-chapter-{{ chapter.id }}">
+                                <!-- Chapter YouTube Links -->
+                                {% if chapter.youtube_links.all %}
+                                <ul>
+                                    {% for link in chapter.youtube_links.all %}
+                                    <li>
+                                        <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% endif %}
+
+                                {% for subheading in chapter.subheadings.all %}
+                                <div class="ms-4">
+                                    <h6>
+                                        {% if subheading.text %}
+                                        <a href="{% url 'subheading_detail' subheading.id %}">{{ subheading.title }}</a>
+                                        {% else %}
+                                        {{ subheading.title }}
+                                        {% endif %}
+                                    </h6>
+                                    <!-- Subheading YouTube Links -->
+                                    {% if subheading.youtube_links.all %}
+                                    <ul>
+                                        {% for link in subheading.youtube_links.all %}
+                                        <li>
+                                            <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

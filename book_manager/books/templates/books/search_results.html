@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+
+
+{% comment %} <div class="container my-5">
+    <h1 class="mb-4">Search Results</h1>
+
+    <!-- Search Form -->
+    <form method="get" action="{% url 'search' %}" class="mb-4">
+        <div class="input-group">
+            <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Search for a term..." aria-label="Search">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <!-- Display Search Results -->
+    {% if query %}
+        <h3>Results for "{{ query }}"</h3>
+        {% if results %}
+            <ul class="list-group">
+                {% for result in results %}
+                    <li class="list-group-item">
+                        <h4>
+                            <a href="{% if result.text %}{% url 'chapter_detail' result.id %}{% else %}#none{% endif %}">
+                                {{ result.title }}
+                            </a>
+                        </h4>
+
+                        <!-- YouTube Links for the Chapter -->
+                        {% if result.youtube_links %}
+                            <p>YouTube Links:</p>
+                            <ul>
+                                {% for link in result.youtube_links %}
+                                    <li>
+                                        <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        <!-- Subheadings and Their Links -->
+                        {% if result.subheadings %}
+                            <ul>
+                                {% for subheading in result.subheadings %}
+                                    <li>
+                                        <strong>
+                                            <a href="{% if subheading.text %}{% url 'subheading_detail' subheading.id %}{% else %}#none{% endif %}">
+                                                {{ subheading.title }}
+                                            </a>
+                                        </strong>
+
+                                        <!-- YouTube Links for the Subheading -->
+                                        {% if subheading.youtube_links %}
+                                            <p>YouTube Links:</p>
+                                            <ul>
+                                                {% for link in subheading.youtube_links %}
+                                                    <li>
+                                                        <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No results found for "{{ query }}". Try another term.</p>
+        {% endif %}
+    {% else %}
+        <p>Enter a term above to search.</p>
+    {% endif %}
+</div>
+
+
+ {% endcomment %}
+
+
+
+
+
+ <form method="get" action="{% url 'search' %}">
+    <input type="text" name="q" placeholder="Search...">
+    <button type="submit">Search</button>
+</form>
+
+{% for result in results %}
+    <div>
+        <p><strong>Breadcrumb:</strong> {{ result.breadcrumb }}</p>
+        <p><strong>Found Text:</strong> {{ result.text }}</p>
+    </div>
+{% endfor %}
+
+
+
+
+
+
+
+</body>
+</html>

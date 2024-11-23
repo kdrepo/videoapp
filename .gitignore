@@ -1,0 +1,6 @@
+myvenv
+\__pycache__
+__pycache__\
+staticfiles\
+\staticfiles
+\migrations
