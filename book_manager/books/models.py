@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.postgres.search import SearchVectorField
+from django.db.models import Index
 
 
 class Book(models.Model):
@@ -14,6 +16,12 @@ class Chapter(models.Model):
     title = models.CharField(max_length=255)
     order = models.PositiveIntegerField()
     text = models.TextField(blank=True, null=True)
+    search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
+
+    class Meta:
+        indexes = [
+            Index(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         return f"{self.book.title} - {self.title}"
@@ -24,6 +32,12 @@ class Subheading(models.Model):
     title = models.CharField(max_length=255)
     order = models.PositiveIntegerField()
     text = models.TextField(blank=True, null=True)
+    search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
+
+    class Meta:
+        indexes = [
+            Index(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         return f"{self.chapter.title} - {self.title}"
@@ -34,6 +48,12 @@ class Subheading2(models.Model):
     title = models.CharField(max_length=255)
     order = models.PositiveIntegerField()
     text = models.TextField(blank=True, null=True)
+    search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
+
+    class Meta:
+        indexes = [
+            Index(fields=["search_vector"]),
+        ]
 
     def __str__(self):
         return f"{self.subheading.title} - {self.title}"
