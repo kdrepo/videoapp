@@ -17,17 +17,71 @@
         </div>
     {% endif %}
 
-  <!-- YouTube Links -->
-{% if subheading.youtube_links.exists %} <!-- Check if links exist -->
-<h3 class="mt-4">YouTube Links</h3>
-<ul>
-    {% for link in subheading.youtube_links.all %}
-        <li>
-            <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
-        </li>
-    {% endfor %}
-</ul>
-{% endif %}
+    <!-- YouTube Links in Tabular Format -->
+    {% if youtube_links %}
+        <h3 class="mt-4">YouTube Links</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>Link</th>
+                    <th>Topics</th>
+                    <th>Questions</th>
+                    <th>Categories</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for link in youtube_links %}
+                    <tr>
+                        <!-- Button Column -->
+                        <td>
+                            <button class="btn btn-primary" onclick="window.open('{{ link.url }}', '_blank')">Open</button>
+                        </td>
+                        
+                        <!-- YouTube Link Column -->
+                        <td>
+                            <a href="{{ link.url }}" target="_blank">{{ link.url }}</a>
+                        </td>
+                        
+                        <!-- Topics Column -->
+                        <td>
+                            {% if link.topics.exists %}
+                                {% for topic in link.topics.all %}
+                                <span class="badge bg-warning text-dark">{{ topic.topic }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">No Topics</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Questions Column -->
+                        <td>
+                            {% if link.questions.exists %}
+                                {% for question in link.questions.all %} 
+                                <span class="badge bg-info text-dark">{{ question.question_text }}</span> 
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted ">No Questions</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Categories Column -->
+                        <td>
+                            {% if link.categories.exists %}
+                                {% for category in link.categories.all %}
+                                <span class="badge bg-primary">{{ category.category }}</span><br>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">No Categories</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted mt-4">No YouTube links available.</p>
+    {% endif %}
 
     <!-- Back to Table of Contents -->
     <a href="{% url 'table_of_contents' %}" class="btn btn-secondary mt-4">Back to Table of Contents</a>
