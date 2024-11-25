@@ -58,7 +58,7 @@ class Category(models.Model):
 
 class Topic(models.Model):
     topic = models.CharField(max_length=255)
-    youtube_timestamp = models.TimeField(null=True, blank=True)  # Optional YouTube timestamp
+    youtube_timestamp = models.CharField(max_length=8, null=True, blank=True)  # Optional YouTube timestamp
     search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
 
     class Meta:
@@ -85,6 +85,7 @@ class Question(models.Model):
 
 class YouTubeLink(models.Model):
     url = models.URLField()
+    title = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     categories = models.ManyToManyField(Category, related_name="youtube_links", blank=True)  # Many-to-Many with Category
     topics = models.ManyToManyField(Topic, related_name="youtube_links", blank=True)  # Many-to-Many with Topic
@@ -92,5 +93,14 @@ class YouTubeLink(models.Model):
     chapter = models.ForeignKey(Chapter, related_name="youtube_links", on_delete=models.CASCADE, blank=True, null=True)  # Retained Chapter relationship
     subheading = models.ForeignKey(Subheading, related_name="youtube_links", on_delete=models.CASCADE, blank=True, null=True)  # Retained Subheading relationship
 
+    def embed_url_id(self):
+        # Extract the YouTube video ID from the URL
+        if "v=" in self.url:
+            return self.url.split("v=")[1].split("&")[0]
+            # print(self.youtube_url.split("v=")[1].split("&")[0])
+        elif "youtu.be/" in self.url:
+            return self.url.split("youtu.be/")[1]
+        return None
+    
     def __str__(self):
         return self.url

@@ -6,7 +6,7 @@ class YouTubeLinkInline(admin.TabularInline):
     """Inline form for managing YouTube links."""
     model = YouTubeLink
     extra = 1  # Number of empty forms to display
-    fields = ['url', 'description', 'categories', 'topics', 'questions']  # Many-to-Many fields included
+    fields = ['url', 'title', 'description', 'categories', 'topics', 'questions']  # Many-to-Many fields included
     verbose_name = "YouTube Link"
     verbose_name_plural = "YouTube Links"
     filter_horizontal = ['categories', 'topics', 'questions']  # Enable horizontal filter for Many-to-Many fields

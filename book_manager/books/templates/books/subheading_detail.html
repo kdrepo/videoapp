@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,27 +6,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ subheading.title }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        /* Add custom styles for better visuals */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        h1, h3 {
+            color: #343a40;
+            text-align: center;
+        }
+
+        .desclass {
+            font-size: 0.88rem;
+        }
+
+        table {
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+
+        thead {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #f8f9fa;
+        }
+
+        {% comment %} tbody tr:hover {
+            background-color: #e9ecef;
+        } {% endcomment %}
+
+        .badge {
+            font-size: 0.8rem;
+        }
+
+        .btn-primary {
+            background-color: #e9ecef;
+            border-color: #007bff;
+            color: #343a40;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .modal-header {
+            background-color: #e9ecef;
+            color: black;
+        }
+
+        .modal-footer {
+            background-color: #f8f9fa;
+        }
+
+        .modal-body {
+            background-color: #ffffff;
+        }
+
+        .ratio {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
-<div class="container my-5">
-    <h1>{{ subheading.title }}</h1>
+    <div class="container my-5 p-4 shadow rounded bg-white">
+    <h2>{{ subheading.title }}</h2>
 
-    <!-- Subheading Text -->
     {% if subheading.text %}
         <div class="mt-4">
             <p>{{ subheading.text }}</p>
         </div>
     {% endif %}
 
-    <!-- YouTube Links in Tabular Format -->
     {% if youtube_links %}
-        <h3 class="mt-4">YouTube Links</h3>
+        <h4 class="mt-4">YouTube Links</h4>
+        <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Action</th>
-                    <th>Link</th>
-                    <th>Topics</th>
+                    <th>Open</th>
+                    <th>Class Link</th>
+                    <th>Topics </th>
                     <th>Questions</th>
                     <th>Categories</th>
                 </tr>
@@ -33,58 +102,152 @@
             <tbody>
                 {% for link in youtube_links %}
                     <tr>
-                        <!-- Button Column -->
                         <td>
-                            <button class="btn btn-primary" onclick="window.open('{{ link.url }}', '_blank')">Open</button>
+                            <button class="btn btn-primary open-modal-btn" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modal-{{ link.id }}">Open</button>
                         </td>
-                        
-                        <!-- YouTube Link Column -->
                         <td>
                             <a href="{{ link.url }}" target="_blank">{{ link.url }}</a>
                         </td>
-                        
-                        <!-- Topics Column -->
                         <td>
                             {% if link.topics.exists %}
                                 {% for topic in link.topics.all %}
-                                <span class="badge bg-warning text-dark">{{ topic.topic }}</span>
+                                    <span class="badge bg-warning">{{ topic.topic }}</span>
                                 {% endfor %}
                             {% else %}
                                 <span class="text-muted">No Topics</span>
                             {% endif %}
                         </td>
-                        
-                        <!-- Questions Column -->
                         <td>
                             {% if link.questions.exists %}
-                                {% for question in link.questions.all %} 
-                                <span class="badge bg-info text-dark">{{ question.question_text }}</span> 
+                                {% for question in link.questions.all %}
+                                    <span class="badge bg-info">{{ question.question_text }}</span>
                                 {% endfor %}
                             {% else %}
-                                <span class="text-muted ">No Questions</span>
+                                <span class="text-muted">No Questions</span>
                             {% endif %}
                         </td>
-                        
-                        <!-- Categories Column -->
                         <td>
                             {% if link.categories.exists %}
                                 {% for category in link.categories.all %}
-                                <span class="badge bg-primary">{{ category.category }}</span><br>
+                                    <span class="badge bg-primary">{{ category.category }}</span><br>
                                 {% endfor %}
                             {% else %}
                                 <span class="text-muted">No Categories</span>
                             {% endif %}
                         </td>
                     </tr>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="modal-{{ link.id }}" tabindex="-1" aria-labelledby="modalLabel-{{ link.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="modalLabel-{{ link.id }}">YouTube Link Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Title and Embedded Video -->
+                                    <div class="border border-dark rounded p-2 mb-3">
+                                        <h6>{{ link.title|default:"No Title" }}</h6>
+                                        <div class="ratio ratio-16x9">
+                                            <iframe id="youtube-{{ link.id }}" class="youtube-video"
+                                                    src="https://www.youtube.com/embed/{{ link.embed_url_id }}?enablejsapi=1"
+                                                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowfullscreen>
+                                            </iframe>
+                                        </div>
+                                    </div>
+                                    <h6 class="mt-4">Topics</h6>
+                                    <div class="border border-info rounded p-2">
+                                        {% if link.topics.exists %}
+                                            {% for topic in link.topics.all %}
+                                            <span class="badge bg-primary timestamp">
+                                                <span class="timestamp"
+                                                      data-time="{{ topic.youtube_timestamp|default:'00:00:00' }}"
+                                                      data-iframe="youtube-{{ link.id }}">
+                                                    {{ topic.youtube_timestamp }}
+                                                </span>-{{ topic.topic }}
+                                            </span>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p class="text-muted">No Topics</p>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="mt-4">Questions</h6>
+                                    <div class="border border-info rounded p-2">
+                                        {% if link.questions.exists %}
+                                            
+                                                {% for question in link.questions.all %}
+                                                <li><span class="badge bg-info">{{ question.question_text }}</span></li>
+                                                {% endfor %}
+                                            
+                                        {% else %}
+                                            <p class="text-muted">No Questions</p>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="mt-4">Description</h6>
+                                    <div class="border border-success rounded p-2">
+                                        <p class="text-muted desclass">{{ link.description|default:"No Description" }}</p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 {% endfor %}
             </tbody>
         </table>
+        </div>
     {% else %}
-        <p class="text-muted mt-4">No YouTube links available.</p>
+        <p class="text-muted">No YouTube links available.</p>
     {% endif %}
-
-    <!-- Back to Table of Contents -->
-    <a href="{% url 'table_of_contents' %}" class="btn btn-secondary mt-4">Back to Table of Contents</a>
 </div>
+
+<script>
+    const players = {}; // Store player instances
+
+    // Initialize YouTube API dynamically
+    function onYouTubeIframeAPIReady() {
+        document.querySelectorAll('iframe.youtube-video').forEach(iframe => {
+            const iframeId = iframe.getAttribute('id');
+            players[iframeId] = new YT.Player(iframeId);
+        });
+    }
+
+    // Handle timestamp clicks
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('timestamp')) {
+            const time = event.target.getAttribute('data-time');
+            const iframeId = event.target.getAttribute('data-iframe');
+            const [hours, minutes, seconds] = time.split(':').map(Number);
+            const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+            if (players[iframeId]) {
+                players[iframeId].seekTo(totalSeconds, true);
+            }
+        }
+    });
+
+    // Dynamically load YouTube API script
+    const script = document.createElement('script');
+    script.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(script);
+
+    // Stop video playback when modal is closed
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', () => {
+            const iframe = modal.querySelector('iframe.youtube-video');
+            if (iframe && players[iframe.id]) {
+                players[iframe.id].stopVideo();
+            }
+        });
+    });
+</script>
 </body>
-</html>
+</html> 
+
+
