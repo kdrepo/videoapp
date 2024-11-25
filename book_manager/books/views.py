@@ -127,12 +127,14 @@ def search(request):
 
         # Search Chapters
         chapters = Chapter.objects.annotate(
-            rank=SearchRank(search_vector, search_query)
+            rank=SearchRank(search_vector, search_query),
+            headline=SearchHeadline('text', search_query, start_sel='<mark class="badge text-bg-success">', stop_sel='</b>', max_words=300, min_words=50)
         ).filter(rank__gte=0.1).order_by('-rank')
 
         # Search Subheadings
         subheadings = Subheading.objects.annotate(
-            rank=SearchRank(search_vector, search_query)
+            rank=SearchRank(search_vector, search_query),
+            headline=SearchHeadline('text', search_query, start_sel='<mark class="badge text-bg-success">', stop_sel='</b>''</mark>', max_words=300, min_words=50)
         ).filter(rank__gte=0.1).order_by('-rank')
 
         # Combine results with YouTube links
@@ -141,6 +143,7 @@ def search(request):
                 'type': 'chapter',
                 'title': chapter.title,
                 'text': chapter.text,
+                'headline': chapter.headline,
                 'youtube_links': list(chapter.youtube_links.all()),
                 'breadcrumbs': f'Chapter: {chapter.title}'
             })
@@ -150,6 +153,7 @@ def search(request):
                 'id': subheading.id,
                 'title': subheading.title,
                 'text': subheading.text,
+                'headline': subheading.headline,
                 'youtube_links': list(subheading.youtube_links.all()),
                 'breadcrumbs': f'Chapter: {subheading.chapter.title} > Subheading: {subheading.title}'
             })

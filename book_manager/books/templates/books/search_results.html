@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -49,9 +49,7 @@
           <li class="list-group-item">
             <nav aria-label="breadcrumb">
               <ol class="breadcrumb">
-                {% comment %}
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                {% endcomment %}
+                
                 <li class="breadcrumb-item">
                   <a>{{ result.4link }}</a>
                 </li>
@@ -63,11 +61,11 @@
             <div class="mypadding">
               <h5>{{ result.title }}</h5>
               
-              {% comment %} <li><a href="{{result.type}}/{{ result.id }}">link</a></li> {% endcomment %}
+              
 
               <p>
                 {% if result.headline %} {{ result.headline|safe }} {% else %}
-                {% comment %} {{ result.text|truncatewords:100 }} {% endcomment%}
+                
                  {{ result.text}} {% endif %}
               </p>
 
@@ -91,4 +89,109 @@
       </div>
     </div>
   </body>
+</html> {% endcomment %}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+        }
+        .breadcrumb {
+            background-color: #e3d9bc;
+            border-radius: 5px;
+            padding: 8px 15px;
+        }
+        .breadcrumb-item a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+        .youtube-links {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .youtube-links li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1>Search Results</h1>
+    <form method="get" action="{% url 'search' %}">
+        <div class="input-group mb-4">
+            <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <div>
+        {% if results %}
+        <ul class="list-group">
+            {% for result in results %}
+            <li class="list-group-item result-card">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            {% if result.type == "chapter" %}
+                            <a href="{% url 'chapter_detail' result.id %}">{{ result.breadcrumbs }}</a>
+                            {% elif result.type == "subheading" %}
+                            <a href="{% url 'subheading_detail' result.id %}">{{ result.breadcrumbs }}</a>
+                            {% endif %}
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            {{ result.title }}
+                        </li>
+                    </ol>
+                </nav>
+
+                <!-- Title -->
+                <h5>
+                    {% if result.type == "chapter" %}
+                    <a href="{% url 'chapter_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a>
+                    {% elif result.type == "subheading" %}
+                    <a href="{% url 'subheading_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a>
+                    {% endif %}
+                </h5>
+
+                <!-- Description -->
+                <p>
+                    {{ result.headline|safe|truncatewords:50 }}
+                </p>
+
+                <!-- YouTube Links -->
+                {% if result.youtube_links %}
+                <p><strong>YouTube Links:</strong></p>
+                <ul class="youtube-links">
+                    {% for link in result.youtube_links %}
+                    <li>
+                        <a href="{{ link.url }}" target="_blank">{{ link.title|default:link.url }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No results found for "{{ query }}".</p>
+        {% endif %}
+    </div>
+</div>
+</body>
 </html>
