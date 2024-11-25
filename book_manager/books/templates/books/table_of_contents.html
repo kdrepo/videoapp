@@ -6,6 +6,38 @@
     <title>Table of Contents</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h4 {
+            color: #343a40;
+        }
+
+        h5 {
+            color: #495057;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+        }
+
+        .accordion-item {
+            border: none;
+        }
+
+        .accordion-button {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: #e9ecef;
+            color: #212529;
+        }
+    </style>
 </head>
 <body>
     <div class="container my-5">
@@ -18,53 +50,37 @@
                         {{ book.title }}
                     </button>
                 </h2>
-                <div id="collapse-book-{{ book.id }}" class="accordion-collapse collapse" aria-labelledby="heading-book-{{ book.id }}" data-bs-parent="#bookAccordion">
+                <div id="collapse-book-{{ book.id }}" class="accordion-collapse collapse show" aria-labelledby="heading-book-{{ book.id }}" data-bs-parent="#bookAccordion">
                     <div class="accordion-body">
                         {% for chapter in book.chapters.all %}
-                        <div class="ms-3">
-                            <div class="d-flex justify-content-between align-items-center">
+                        <div class="ms-1">
+                            <!-- Chapter Title as Toggle -->
+                            <button class="btn btn-link text-decoration-none text-start w-100 d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-chapter-{{ chapter.id }}" aria-expanded="false" aria-controls="collapse-chapter-{{ chapter.id }}">
                                 <h5 class="mb-0">
                                     {% if chapter.text %}
-                                    <a href="{% url 'chapter_detail' chapter.id %}">{{ chapter.title }}</a>
+                                    <a href="{% url 'chapter_detail' chapter.id %}" class="text-decoration-none text-black">{{ chapter.title }}</a>
                                     {% else %}
                                     {{ chapter.title }}
                                     {% endif %}
                                 </h5>
-                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-chapter-{{ chapter.id }}" aria-expanded="false" aria-controls="collapse-chapter-{{ chapter.id }}">
-                                    <i class="bi bi-chevron-down"></i>
-                                </button>
-                            </div>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
                             <div class="collapse mt-2" id="collapse-chapter-{{ chapter.id }}">
-                                <!-- Chapter YouTube Links -->
-                                {% if chapter.youtube_links.all %}
-                                <ul>
-                                    {% for link in chapter.youtube_links.all %}
-                                    <li>
-                                        <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                                {% endif %}
-
+                                <!-- Subheadings -->
                                 {% for subheading in chapter.subheadings.all %}
-                                <div class="ms-4">
-                                    <h6>
-                                        {% if subheading.text %}
-                                        <a href="{% url 'subheading_detail' subheading.id %}">{{ subheading.title }}</a>
-                                        {% else %}
-                                        {{ subheading.title }}
-                                        {% endif %}
-                                    </h6>
-                                    <!-- Subheading YouTube Links -->
-                                    {% if subheading.youtube_links.all %}
-                                    <ul>
-                                        {% for link in subheading.youtube_links.all %}
-                                        <li>
-                                            <a href="{{ link.url }}" target="_blank">{{ link.description|default:"Watch on YouTube" }}</a>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                    {% endif %}
+                                <div class="ms-4 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>
+                                            {{ forloop.counter }})   
+                                            {% if subheading.text %}
+                                            <a href="{% url 'subheading_detail' subheading.id %}" class="text-decoration-none">{{ subheading.title }}</a>
+                                            <span class="badge rounded-pill bg-info text-dark">Classes: {{ subheading.youtube_links.count }}</span>
+                                            {% else %}
+                                            {{ subheading.title }}
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                    
                                 </div>
                                 {% endfor %}
                             </div>
