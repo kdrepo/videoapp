@@ -9,7 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -48,23 +47,11 @@
         .youtube-links li {
             margin-bottom: 5px;
         }
-
-        .badge-category {
-            cursor: pointer;
-            margin: 5px;
-        }
-        .table-container {
-            margin-top: 20px;
-        }
-        body {
-            background-color: #f8f9fa;
-        }
     </style>
 </head>
 <body>
-<div class="container my-5 p-4 shadow rounded bg-white">
-    <div class="container p-4 shadow rounded bg-white">
-    <h2>Search</h2>
+<div class="container my-5">
+    <h1>Search</h1>
     
     <!-- Search Form -->
     <form method="get" action="{% url 'weighted_search' %}" class="row g-3 align-items-center">
@@ -87,39 +74,19 @@
                 <label class="form-check-label" for="radio-questions">Questions</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="search_type" id="radio-combined" value="general" {% if search_type == "general" %}checked{% endif %}>
-                <label class="form-check-label" for="radio-combined">General</label>
+                <input class="form-check-input" type="radio" name="search_type" id="radio-combined" value="text" {% if search_type == "text" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-combined">Combined Topics + Questions</label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="radio" name="search_type" id="radio-textonly" value="textonly" {% if search_type == "textonly" %}checked{% endif %}>
                 <label class="form-check-label" for="radio-textonly">Text</label>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="listCategories" name="cat_search_Type" value="categories"  {% if search_type == "categories" %}checked{% endif %}> 
-                <label class="form-check-label" for="listCategories"> List Categories</label>
-            </div>
-            
         </div>
     </form>
-</div>
-
-
-        {% comment %} <div> Your Serach Results Under <span class="badge bg-danger"> {{ search_type }} category </span></div> {% endcomment %}
-        <div class="container my-5">
-        <!-- Category Badges -->
-        <div id="categoriesContainer" class="mb-4"></div> 
-    
-        <!-- Table for YouTube Links -->
-        <div id="youtubeLinksContainer" class="table-container table-responsive"></div>
-    </div>  
-
-
     
 
     {% if results %}
     <!-- Results Table -->
-    <div id='result_div'>
-    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }} category </span></div>
     <div class="table-responsive mt-4">
         <table class="table table-bordered">
             <thead>
@@ -242,9 +209,7 @@
 
     {% elif results_text_only %}
     <!-- Text-Only Results -->
-    <div id="text_div_to_hide">
-    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }} category </span></div><br>
-    
+    <div><br>
     <ul class="list-group">
         {% for result in results_text_only %}
         <li class="list-group-item result-card">
@@ -285,35 +250,13 @@
         </li>
         {% endfor %}
     </ul>
-    
-    </div>   
-
-
-
-
-    
-
-    
-    
-
+    <div>
     
     {% else %}
     <!-- No Results Found -->
-    <div id="divtohide">
-    <p class="text-muted mt-4">No results! Search Something Else</p>
-    </div>
+    <p class="text-muted mt-4">No results found.</p>
     {% endif %}
 </div>
-
-
-
-
-
-
-</div>
-
-
-
 
 <script>
     let players = {};
@@ -357,156 +300,5 @@
         });
     });
 </script>
-
-
-
-
-    
-
-
-
-
-<script>
-    $(document).ready(function () {
-        // Handle List Categories Checkbox
-        $('#listCategories').on('change', function () {
-            if (this.checked) {
-                $.ajax({
-                    url: '/categories/',
-                    type: 'GET',
-                    success: function (data) {
-                        const categoriesContainer = $('#categoriesContainer');
-                        const divtohide = $('#divtohide');
-                        const result_div = $('#result_div');
-                        const text_div_to_hide = $('#text_div_to_hide');
-                        divtohide.hide();
-                        result_div.hide();
-                        text_div_to_hide.hide();
-                        categoriesContainer.empty();
-                        categoriesContainer.css({
-                            'border': '1px solid #007bff',
-                            'padding': '10px',
-                            'border-radius': '5px'
-                        });
-
-                        data.categories.forEach(category => {
-                            categoriesContainer.append(
-                                `<span class="badge bg-primary badge-category" data-category="${category.id}">${category.category}   </span>`
-                            );
-                        });
-                    },
-                    error: function () {
-                        alert('Error fetching categories');
-                    }
-                });
-            } else {
-                $('#categoriesContainer').empty();
-                $('#youtubeLinksContainer').empty();
-                $('#categoriesContainer').css({
-                    'border': '',
-                    'padding': '',
-                    'border-radius': ''
-                }).empty();
-                
-            }
-        });
-
-        // Handle Category Badge Click
-        $(document).on('click', '.badge-category', function () {
-            const categoryId = $(this).data('category');
-            $.ajax({
-                url: `/youtube-links/${categoryId}/`,
-                type: 'GET',
-                success: function (data) {
-                    const youtubeLinksContainer = $('#youtubeLinksContainer');
-                    youtubeLinksContainer.empty();
-
-                    // Create Table
-                    let tableHtml = `
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Open</th>
-                                    <th>Class Link</th>
-                                    <th>Topics</th>
-                                    <th>Questions</th>
-                                    <th>Subheadings</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-
-                    data.youtube_links.forEach(link => {
-                        tableHtml += `
-                            <tr>
-                                <td>
-                                    <button class="btn btn-primary open-modal-btn" data-bs-toggle="modal" data-bs-target="#modal-${link.id}">Open</button>
-                                </td>
-                                <td>
-                                    <a href="${link.url}" target="_blank">${link.url}</a>
-                                </td>
-                                <td>
-                                    ${link.topics.map(topic => `<span class="badge bg-warning">${topic}</span>`).join(' ')}
-                                </td>
-                                <td>
-                                    ${link.questions.map(question => `<span class="badge bg-info">${question}</span>`).join(' ')}
-                                </td>
-                                <td>
-                                    ${link.subheadings.map(subheading => `<span class="badge bg-secondary">${subheading}</span>`).join('<br>')}
-                                </td>
-                            </tr>
-                        `;
-
-                        // Add Modal for each link
-                        tableHtml += `
-                            <div class="modal fade" id="modal-${link.id}" tabindex="-1" aria-labelledby="modalLabel-${link.id}" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="modalLabel-${link.id}">YouTube Link Details</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <h6>${link.title || 'No Title'}</h6>
-                                            <div class="ratio ratio-16x9">
-                                                <iframe
-                                                    src="https://www.youtube.com/embed/${link.embed_url_id}?enablejsapi=1"
-                                                    frameborder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                    allowfullscreen>
-                                                </iframe>
-                                            </div>
-                                            <p><strong>Topics:</strong> ${link.topics.join(', ') || 'No Topics'}</p>
-                                            <p><strong>Questions:</strong> ${link.questions.join(', ') || 'No Questions'}</p>
-                                            <p><strong>Description:</strong> ${link.description || 'No Description'}</p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    tableHtml += `</tbody></table>`;
-                    youtubeLinksContainer.append(tableHtml);
-                },
-                error: function () {
-                    alert('Error fetching YouTube links');
-                }
-            });
-        });
-    });
-</script>
-
-
-
-
-
-
-
-
-
 </body>
 </html>
