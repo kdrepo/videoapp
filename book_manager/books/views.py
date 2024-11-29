@@ -8,6 +8,17 @@ from django.http import JsonResponse
 
 
 
+def toc(request):
+    # books = Book.objects.prefetch_related(
+    #     'chapters__subheadings',
+    #     'chapters__youtube_links',
+    #     'chapters__subheadings__youtube_links',
+    # )
+    return render(request, 'books/toc.html')
+
+
+
+
 def table_of_contents(request):
     books = Book.objects.prefetch_related(
         'chapters__subheadings',
@@ -28,9 +39,16 @@ def subheading_detail(request, pk):
     # Fetch YouTube links with their associated categories, topics, and questions
     youtube_links = subheading.youtube_links.prefetch_related('categories', 'topics', 'questions')
 
+    books = Book.objects.prefetch_related(
+        'chapters__subheadings',
+        'chapters__youtube_links',
+        'chapters__subheadings__youtube_links',
+    )
+
     return render(request, 'books/subheading_detail.html', {
         'subheading': subheading,
         'youtube_links': youtube_links,
+        'books': books,
     })
 
 
