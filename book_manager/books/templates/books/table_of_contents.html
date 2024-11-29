@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -114,7 +114,7 @@
     </nav>
     
     <!-- Table of Contents -->
-    <div class="container my-5">
+    <div class="container my-5 p-4 shadow rounded bg-white">
         <h1>Table of Contents</h1>
         <div class="accordion" id="bookAccordion">
             {% for book in books %}
@@ -169,5 +169,201 @@
     <!-- Bootstrap 5 JS and Popper.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> {% endcomment %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table of Contents</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Default (Light Mode) Styles */
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            transition: all 0.3s ease;
+        }
+
+        .navbar {
+            background-color: #343a40;
+            color: #fff;
+        }
+
+        .navbar-brand {
+            color: #fff;
+        }
+
+        /* Dark Mode Styles */
+        .dark-mode {
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .navbar {
+            background-color: #343a40;
+        }
+
+        .dark-mode .navbar-brand {
+            color: #f8f9fa;
+        }
+
+        /* Main content container */
+        .dark-mode .container.bg-white {
+            background-color: #495057; /* Dark background for the container in dark mode */
+            color: #f8f9fa; /* Light text for better contrast */
+        }
+
+        .dark-mode .accordion-button {
+            background-color: #495057;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .accordion-button:not(.collapsed) {
+            background-color: #6c757d;
+            color: #212529;
+        }
+
+        .dark-mode .accordion-body {
+            background-color: #495057;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .btn-primary {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .btn-primary:hover {
+            background-color: #6c757d;
+            border-color: #5a6268;
+        }
+
+        /* Dark mode toggle button */
+        .darkmode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #343a40;
+            color: #f8f9fa;
+            border: none;
+            border-radius: 50%;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .darkmode-toggle:hover {
+            background-color: #6c757d;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand ms-2" href="{% url 'home' %}">Sadlec Classes</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto"> <!-- ms-auto aligns items to the right -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="ps-3 nav-link {% if request.resolver_match.url_name == 'weighted_search' %}active{% endif %}" href="{% url 'weighted_search' %}">Search</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Table of Contents -->
+    <div class="container my-5 p-4 shadow rounded bg-white">
+        <h1>Table of Contents</h1>
+        <div class="accordion" id="bookAccordion">
+            {% for book in books %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-book-{{ book.id }}">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-book-{{ book.id }}" aria-expanded="true" aria-controls="collapse-book-{{ book.id }}">
+                        {{ book.title }}
+                    </button>
+                </h2>
+                <div id="collapse-book-{{ book.id }}" class="accordion-collapse collapse show" aria-labelledby="heading-book-{{ book.id }}" data-bs-parent="#bookAccordion">
+                    <div class="accordion-body">
+                        {% for chapter in book.chapters.all %}
+                        <div class="ms-1">
+                            <!-- Chapter Title as Toggle -->
+                            <button class="btn btn-link text-decoration-none text-start w-100 d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-chapter-{{ chapter.id }}" aria-expanded="false" aria-controls="collapse-chapter-{{ chapter.id }}">
+                                <h5 class="mb-0">
+                                    {% if chapter.text %}
+                                    <a href="{% url 'chapter_detail' chapter.id %}" class="text-decoration-none text-black">{{ chapter.title }}</a>
+                                    {% else %}
+                                    {{ chapter.title }}
+                                    {% endif %}
+                                </h5>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="collapse mt-2" id="collapse-chapter-{{ chapter.id }}">
+                                <!-- Subheadings -->
+                                {% for subheading in chapter.subheadings.all %}
+                                <div class="ms-4 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6>
+                                            {{ forloop.counter }}  
+                                            {% if subheading.text %}
+                                            <a href="{% url 'subheading_detail' subheading.id %}" class="text-decoration-none">{{ subheading.title }}</a>
+                                            <span class="badge rounded-pill bg-info text-dark">Classes: {{ subheading.youtube_links.count }}</span>
+                                            {% else %}
+                                            {{ subheading.title }}
+                                            {% endif %}
+                                        </h6>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Dark Mode Toggle Button -->
+    <button class="darkmode-toggle" id="darkModeToggle">
+        <i class="bi bi-moon"></i> <!-- Moon icon for Dark Mode -->
+    </button>
+
+    <!-- Bootstrap 5 JS and Popper.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Dark Mode Toggle functionality
+        const darkModeButton = document.getElementById('darkModeToggle');
+        darkModeButton.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');  // Toggle dark mode class on body
+            const icon = darkModeButton.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('bi-moon');
+                icon.classList.add('bi-sun');  // Change icon to sun when in dark mode
+            } else {
+                icon.classList.remove('bi-sun');
+                icon.classList.add('bi-moon');  // Revert to moon icon when in light mode
+            }
+        });
+    </script>
+
 </body>
 </html>

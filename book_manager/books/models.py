@@ -78,6 +78,7 @@ class Topic(models.Model):
 
 class Question(models.Model):
     question_text = models.TextField()
+    question_youtube_timestamp = models.CharField(max_length=8, null=True, blank=True)  # Optional YouTube timestamp
     search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
 
     class Meta:

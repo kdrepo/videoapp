@@ -164,27 +164,38 @@
                                     <h6 class="mt-4">Topics</h6>
                                     <div class="border border-info rounded p-2">
                                         {% if link.topics.exists %}
-                                            {% for topic in link.topics.all %}
+                                        {% for topic in link.topics.all %}
                                             <span class="badge bg-primary timestamp">
-                                                <span class="timestamp"
-                                                      data-time="{{ topic.youtube_timestamp|default:'00:00:00' }}"
-                                                      data-iframe="youtube-{{ link.id }}">
-                                                    {{ topic.youtube_timestamp }}
-                                                </span>-{{ topic.topic }}
+                                                {% if topic.youtube_timestamp %}
+                                                    <span class="timestamp"
+                                                          data-time="{{ topic.youtube_timestamp }}"
+                                                          data-iframe="youtube-{{ link.id }}">
+                                                        {{ topic.youtube_timestamp }}
+                                                    </span> -
+                                                {% endif %}
+                                                {{ topic.topic }}
                                             </span>
-                                            {% endfor %}
-                                        {% else %}
-                                            <p class="text-muted">No Topics</p>
-                                        {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No Topics</p>
+                                    {% endif %}
+                                    
                                     </div>
                                     <h6 class="mt-4">Questions</h6>
                                     <div class="border border-info rounded p-2">
                                         {% if link.questions.exists %}
-                                            
-                                                {% for question in link.questions.all %}
-                                                <li><span class="badge bg-info">{{ question.question_text }}</span></li>
-                                                {% endfor %}
-                                            
+                                            {% for question in link.questions.all %}
+                                                <span class="badge bg-info timestamp">
+                                                    {% if question.question_youtube_timestamp %}
+                                                        <span class="timestamp"
+                                                            data-time="{{ question.question_youtube_timestamp }}"
+                                                            data-iframe="youtube-{{ link.id }}">
+                                                            {{ question.question_youtube_timestamp }}
+                                                        </span> -
+                                                    {% endif %}
+                                                    {{ question.question_text }}
+                                                </span>
+                                            {% endfor %}
                                         {% else %}
                                             <p class="text-muted">No Questions</p>
                                         {% endif %}
