@@ -1,10 +1,6 @@
 {% extends "books/base_generic.html" %}
 
-
 {% block content %}
-
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ subheading.title }}</title>
@@ -39,10 +35,6 @@
         tbody tr:nth-child(odd) {
             background-color: #f8f9fa;
         }
-
-        {% comment %} tbody tr:hover {
-            background-color: #e9ecef;
-        } {% endcomment %}
 
         .badge {
             font-size: 0.8rem;
@@ -80,190 +72,187 @@
     </style>
 
     <div class="container my-5 p-4 shadow rounded bg-white">
-    <h2>{{ subheading.title }}</h2>
+        <h2>{{ subheading.title }}</h2>
 
-    {% if subheading.text %}
-        <div class="mt-4">
-            <p>{{ subheading.text }}</p>
-        </div>
-    {% endif %}
+        {% if subheading.text %}
+            <div class="mt-4">
+                <p>{{ subheading.text }}</p>
+            </div>
+        {% endif %}
 
-    {% if youtube_links %}
-        <h4 class="mt-4">YouTube Links</h4>
-        <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Open</th>
-                    <th>Class Link</th>
-                    <th>Topics </th>
-                    <th>Questions</th>
-                    <th>Categories</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for link in youtube_links %}
-                    <tr>
-                        <td>
-                            <button class="btn btn-primary open-modal-btn" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#modal-{{ link.id }}">Open</button>
-                        </td>
-                        <td>
-                            <a href="{{ link.url }}" target="_blank">{{ link.url }}</a>
-                        </td>
-                        <td>
-                            {% if link.topics.exists %}
-                                {% for topic in link.topics.all %}
-                                    <span class="badge bg-warning">{{ topic.topic }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <span class="text-muted">No Topics</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if link.questions.exists %}
-                                {% for question in link.questions.all %}
-                                    <span class="badge bg-info">{{ question.question_text }}</span>
-                                {% endfor %}
-                            {% else %}
-                                <span class="text-muted">No Questions</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if link.categories.exists %}
-                                {% for category in link.categories.all %}
-                                    <span class="badge bg-primary">{{ category.category }}</span><br>
-                                {% endfor %}
-                            {% else %}
-                                <span class="text-muted">No Categories</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    <!-- Modal -->
-                    <div class="modal fade" id="modal-{{ link.id }}" tabindex="-1" aria-labelledby="modalLabel-{{ link.id }}" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="modalLabel-{{ link.id }}">YouTube Link Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Title and Embedded Video -->
-                                    <div class="border border-dark rounded p-2 mb-3">
-                                        <h6>{{ link.title|default:"No Title" }}</h6>
-                                        <div class="ratio ratio-16x9">
-                                            <iframe id="youtube-{{ link.id }}" class="youtube-video"
-                                                    src="https://www.youtube.com/embed/{{ link.embed_url_id }}?enablejsapi=1"
-                                                    frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                    allowfullscreen>
-                                            </iframe>
-                                        </div>
-                                    </div>
-                                    <h6 class="mt-4">Topics</h6>
-                                    <div class="border border-info rounded p-2">
-                                        {% if link.topics.exists %}
+        {% if youtube_links %}
+            <h4 class="mt-4">YouTube Links</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Open</th>
+                            <th>Class Link</th>
+                            <th>Topics</th>
+                            <th>Questions</th>
+                            <th>Categories</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for link in youtube_links %}
+                            <tr>
+                                <td>
+                                    <button class="btn btn-primary open-modal-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modal-{{ link.id }}">Open</button>
+                                </td>
+                                <td>
+                                    <a href="{{ link.url }}" target="_blank">{{ link.title }}</a>
+                                </td>
+                                <td>
+                                    {% if link.topics.exists %}
                                         {% for topic in link.topics.all %}
-                                            <span class="badge bg-primary timestamp">
-                                                {% if topic.youtube_timestamp %}
-                                                    <span class="timestamp"
-                                                          data-time="{{ topic.youtube_timestamp }}"
-                                                          data-iframe="youtube-{{ link.id }}">
-                                                        {{ topic.youtube_timestamp }}
-                                                    </span> -
-                                                {% endif %}
-                                                {{ topic.topic }}
-                                            </span>
+                                            <span class="badge bg-warning">{{ topic.topic_title }}</span>
                                         {% endfor %}
                                     {% else %}
-                                        <p class="text-muted">No Topics</p>
+                                        <span class="text-muted">No Topics</span>
                                     {% endif %}
-                                    
+                                </td>
+                                <td>
+                                    {% if link.questions.exists %}
+                                        {% for question in link.questions.all %}
+                                            <span class="badge bg-info">{{ question.question_text }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">No Questions</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if link.categories.exists %}
+                                        {% for category in link.categories.all %}
+                                            <span class="badge bg-primary">{{ category.category }}</span><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">No Categories</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="modal-{{ link.id }}" tabindex="-1" aria-labelledby="modalLabel-{{ link.id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalLabel-{{ link.id }}">YouTube Link Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Title and Embedded Video -->
+                                            <div class="border border-dark rounded p-2 mb-3">
+                                                <h6>{{ link.title|default:"No Title" }}</h6>
+                                                <div class="ratio ratio-16x9">
+                                                    <iframe id="youtube-{{ link.id }}" class="youtube-video"
+                                                            src="https://www.youtube.com/embed/{{ link.embed_url_id }}?enablejsapi=1"
+                                                            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowfullscreen>
+                                                    </iframe>
+                                                </div>
+                                            </div>
+
+                                            <h6 class="mt-4">Topics</h6>
+                                            <div class="border border-info rounded p-2">
+                                                {% if link.topics.exists %}
+                                                {% for topic in link.topics.all %}
+                                                    <span class="badge bg-primary timestamp">
+                                                        {% if topic.youtube_timestamp %}
+                                                            <span class="timestamp"
+                                                                  data-time="{{ topic.youtube_timestamp }}"
+                                                                  data-iframe="youtube-{{ link.id }}">
+                                                                {{ topic.youtube_timestamp }}
+                                                            </span> -
+                                                        {% endif %}
+                                                        {{ topic.topic_title }}
+                                                    </span>
+                                                {% endfor %}
+                                                {% else %}
+                                                    <p class="text-muted">No Topics</p>
+                                                {% endif %}
+                                            </div>
+
+                                            <h6 class="mt-4">Questions</h6>
+                                            <div class="border border-info rounded p-2">
+                                                {% if link.questions.exists %}
+                                                    {% for question in link.questions.all %}
+                                                        <span class="badge bg-info timestamp">
+                                                            {% if question.youtube_timestamp %}
+                                                                <span class="timestamp"
+                                                                      data-time="{{ question.youtube_timestamp }}"
+                                                                      data-iframe="youtube-{{ link.id }}">
+                                                                    {{ question.youtube_timestamp }}
+                                                                </span> -
+                                                            {% endif %}
+                                                            {{ question.question_text }}
+                                                        </span>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <p class="text-muted">No Questions</p>
+                                                {% endif %}
+                                            </div>
+
+                                            <h6 class="mt-4">Description</h6>
+                                            <div class="border border-success rounded p-2">
+                                                <p class="text-muted desclass">{{ link.description|default:"No Description" }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
                                     </div>
-                                    <h6 class="mt-4">Questions</h6>
-                                    <div class="border border-info rounded p-2">
-                                        {% if link.questions.exists %}
-                                            {% for question in link.questions.all %}
-                                                <span class="badge bg-info timestamp">
-                                                    {% if question.question_youtube_timestamp %}
-                                                        <span class="timestamp"
-                                                            data-time="{{ question.question_youtube_timestamp }}"
-                                                            data-iframe="youtube-{{ link.id }}">
-                                                            {{ question.question_youtube_timestamp }}
-                                                        </span> -
-                                                    {% endif %}
-                                                    {{ question.question_text }}
-                                                </span>
-                                            {% endfor %}
-                                        {% else %}
-                                            <p class="text-muted">No Questions</p>
-                                        {% endif %}
-                                    </div>
-                                    <h6 class="mt-4">Description</h6>
-                                    <div class="border border-success rounded p-2">
-                                        <p class="text-muted desclass">{{ link.description|default:"No Description" }}</p>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </tbody>
-        </table>
-        </div>
-    {% else %}
-        <p class="text-muted">No YouTube links available.</p>
-    {% endif %}
-</div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No YouTube links available.</p>
+        {% endif %}
+    </div>
 
-<script>
-    const players = {}; // Store player instances
+    <script>
+        const players = {}; // Store player instances
 
-    // Initialize YouTube API dynamically
-    function onYouTubeIframeAPIReady() {
-        document.querySelectorAll('iframe.youtube-video').forEach(iframe => {
-            const iframeId = iframe.getAttribute('id');
-            players[iframeId] = new YT.Player(iframeId);
-        });
-    }
-
-    // Handle timestamp clicks
-    document.addEventListener('click', (event) => {
-        if (event.target.classList.contains('timestamp')) {
-            const time = event.target.getAttribute('data-time');
-            const iframeId = event.target.getAttribute('data-iframe');
-            const [hours, minutes, seconds] = time.split(':').map(Number);
-            const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-
-            if (players[iframeId]) {
-                players[iframeId].seekTo(totalSeconds, true);
-            }
+        // Initialize YouTube API dynamically
+        function onYouTubeIframeAPIReady() {
+            document.querySelectorAll('iframe.youtube-video').forEach(iframe => {
+                const iframeId = iframe.getAttribute('id');
+                players[iframeId] = new YT.Player(iframeId);
+            });
         }
-    });
 
-    // Dynamically load YouTube API script
-    const script = document.createElement('script');
-    script.src = "https://www.youtube.com/iframe_api";
-    document.body.appendChild(script);
+        // Handle timestamp clicks
+        document.addEventListener('click', (event) => {
+            if (event.target.classList.contains('timestamp')) {
+                const time = event.target.getAttribute('data-time');
+                const iframeId = event.target.getAttribute('data-iframe');
+                const [hours, minutes, seconds] = time.split(':').map(Number);
+                const totalSeconds = hours * 3600 + minutes * 60 + seconds;
 
-    // Stop video playback when modal is closed
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('hidden.bs.modal', () => {
-            const iframe = modal.querySelector('iframe.youtube-video');
-            if (iframe && players[iframe.id]) {
-                players[iframe.id].stopVideo();
+                if (players[iframeId]) {
+                    players[iframeId].seekTo(totalSeconds, true);
+                }
             }
         });
-    });
-</script>
 
+        // Dynamically load YouTube API script
+        const script = document.createElement('script');
+        script.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(script);
 
-
+        // Stop video playback when modal is closed
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('hidden.bs.modal', () => {
+                const iframe = modal.querySelector('iframe.youtube-video');
+                if (iframe && players[iframe.id]) {
+                    players[iframe.id].stopVideo();
+                }
+            });
+        });
+    </script>
 
 {% endblock %}
-
-

@@ -17,7 +17,6 @@ class Book(models.Model):
 class Chapter(models.Model):
     book = models.ForeignKey(Book, related_name="chapters", on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    order = models.PositiveIntegerField()
     text = models.TextField(blank=True, null=True)
     search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
 
@@ -34,7 +33,6 @@ class Chapter(models.Model):
 class Subheading(models.Model):
     chapter = models.ForeignKey(Chapter, related_name="subheadings", on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    order = models.PositiveIntegerField()
     text = models.TextField(blank=True, null=True)
     search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
 
@@ -63,28 +61,27 @@ class Category(models.Model):
 
 
 class Topic(models.Model):
-    topic = models.CharField(max_length=255)
+    youtube_link = models.ManyToManyField('YouTubeLink', related_name='topics_links')  # Changed related_name to avoid conflict
+    topic_title = models.CharField(max_length=255)
     youtube_timestamp = models.CharField(max_length=8, null=True, blank=True)  # Optional YouTube timestamp
-    search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
+    # importent_topic = models.CharField(max_length=8, null=True, blank=True)  # Optional YouTube timestamp
+
 
     class Meta:
-        indexes = [
-            Index(fields=["search_vector"]),
-        ]
+        ordering = ['topic_title']
 
     def __str__(self):
-        return self.topic
+        return self.topic_title
 
 
 class Question(models.Model):
+    youtube_link = models.ManyToManyField('YouTubeLink', related_name='questions_links')  # Changed related_name to avoid conflict
     question_text = models.TextField()
-    question_youtube_timestamp = models.CharField(max_length=8, null=True, blank=True)  # Optional YouTube timestamp
-    search_vector = SearchVectorField(null=True, blank=True)  # For full-text search
+    youtube_timestamp = models.CharField(max_length=8, null=True, blank=True)  # Optional YouTube timestamp
+    # importent_question = models.CharField(max_length=8, null=True, blank=True)  # Optional YouTube timestamp
 
     class Meta:
-        indexes = [
-            Index(fields=["search_vector"]),
-        ]
+        ordering = ['question_text']
 
     def __str__(self):
         return self.question_text[:50]  # Return first 50 characters of the question
@@ -94,20 +91,18 @@ class YouTubeLink(models.Model):
     url = models.URLField()
     title = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
-    categories = models.ManyToManyField(Category, related_name="youtube_links", blank=True)  # Many-to-Many with Category
-    topics = models.ManyToManyField(Topic, related_name="youtube_links", blank=True)  # Many-to-Many with Topic
-    questions = models.ManyToManyField(Question, related_name="youtube_links", blank=True)  # Many-to-Many with Question
-    chapters = models.ManyToManyField(Chapter, related_name="youtube_links", blank=True)  # Changed to Many-to-Many with Chapter
-    subheadings = models.ManyToManyField(Subheading, related_name="youtube_links", blank=True)  # Changed to Many-to-Many with Subheading
+    subheadings = models.ManyToManyField(Subheading, related_name="youtube_links_subheading", blank=True)  # Many-to-Many with Subheading
+    topics = models.ManyToManyField(Topic, related_name="youtube_links_topic", blank=True)  # Many-to-Many with Topic
+    questions = models.ManyToManyField(Question, related_name="youtube_links_question", blank=True)  # Many-to-Many with Question
+    categories = models.ManyToManyField(Category, related_name="youtube_links_categories", blank=True)  # Many-to-Many with Category
 
     def embed_url_id(self):
-        # Extract the YouTube video ID from the URL
+        """Extract the YouTube video ID from the URL."""
         if "v=" in self.url:
             return self.url.split("v=")[1].split("&")[0]
-            # print(self.youtube_url.split("v=")[1].split("&")[0])
         elif "youtu.be/" in self.url:
             return self.url.split("youtu.be/")[1]
         return None
-    
+
     def __str__(self):
         return self.url

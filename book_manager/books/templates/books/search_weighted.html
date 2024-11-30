@@ -127,25 +127,37 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Video Title</th>
-                    <th>Link</th>
+                    <th>Video Title link</th>
+                    <th>Subheadings Link</th>                    
                     <th>Topics</th>
-                    <th>Questions</th>
-                    <th>Subheadings</th>
+                    <th>Questions</th>                    
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for result in results %}
                 <tr>
-                    <td>{{ result.match.title|default:"No Title" }}</td>
-                    <td><a href="{{ result.match.url }}" target="_blank">{{ result.match.url }}</a></td>
+                    {% comment %} <td>{{ result.match.title|default:"No Title" }}</td> {% endcomment %}
+                    <td><a href="{{ result.match.url }}" target="_blank">{{ result.match.title|default:"No Title" }}</a></td>
+
+                    <!-- Display Subheadings -->
+                    <td>
+                        {% if result.match.subheadings.all %}
+                            {% for subheading in result.match.subheadings.all %}
+                                <a href="{% url 'subheading_detail' subheading.id %}" class="badge bg-primary text-decoration-none">
+                                    {{ subheading.title }}
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">No Subheadings</span>
+                        {% endif %}
+                    </td>
 
                     <!-- Display Topics -->
                     <td>
                         {% if result.topics %}
                             {% for topic in result.topics %}
-                                <span class="badge bg-warning">{{ topic.topic }}</span>
+                                <span class="badge bg-warning">{{ topic.topic_title }}</span>
                             {% endfor %}
                         {% else %}
                             <span class="text-muted">No Topics</span>
@@ -163,18 +175,7 @@
                         {% endif %}
                     </td>
 
-                    <!-- Display Subheadings -->
-                    <td>
-                        {% if result.match.subheadings.all %}
-                            {% for subheading in result.match.subheadings.all %}
-                                <a href="{% url 'subheading_detail' subheading.id %}" class="badge bg-primary text-decoration-none">
-                                    {{ subheading.title }}
-                                </a>
-                            {% endfor %}
-                        {% else %}
-                            <span class="text-muted">No Subheadings</span>
-                        {% endif %}
-                    </td>
+                    
 
                     <!-- Actions Column -->
                     <td>
@@ -207,16 +208,46 @@
                                 <div class="border border-info rounded p-2">
                                     {% if result.topics %}
                                         {% for topic in result.topics %}
-                                        <span class="badge bg-secondary timestamp"
-                                              data-time="{{ topic.youtube_timestamp|default:'00:00:00' }}"
-                                              data-iframe="youtube-{{ result.match.id }}">
-                                            {{ topic.youtube_timestamp }}
-                                        </span> - {{ topic.topic }}<br>
+                                        <span class="badge bg-primary timestamp">
+                                            {% if topic.youtube_timestamp %}
+                                                <span class="timestamp"
+                                                      data-time="{{ topic.youtube_timestamp }}"
+                                                      data-iframe="youtube-{{ link.id }}">
+                                                    {{ topic.youtube_timestamp }}
+                                                </span> -
+                                            {% endif %}
+                                            {{ topic.topic_title }}
+                                        </span><br>
                                         {% endfor %}
                                     {% else %}
                                         <p class="text-muted">No Topics</p>
                                     {% endif %}
                                 </div>
+
+<!-- Questions with Timestamps -->
+                                <h6 class="mt-3">Questions with Timestamps</h6>
+                                <div class="border border-info rounded p-2">
+                                    {% if result.questions %}
+                                        {% for question in result.questions %}
+                                        <span class="badge bg-primary timestamp">
+                                            {% if question.youtube_timestamp %}
+                                                <span class="timestamp"
+                                                      data-time="{{ topic.youtube_timestamp }}"
+                                                      data-iframe="youtube-{{ link.id }}">
+                                                    {{ topic.youtube_timestamp }}
+                                                </span> -
+                                            {% endif %}
+                                            {{ question.question_text }}
+                                        </span><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No Questions</p>
+                                    {% endif %}
+                                </div>
+                                
+
+
+
 
                                 <!-- Subheadings -->
                                 <h6 class="mt-3">Subheadings</h6>
@@ -231,6 +262,9 @@
                                         <p class="text-muted">No Subheadings</p>
                                     {% endif %}
                                 </div>
+
+
+
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -417,14 +451,16 @@
         // Handle Category Badge Click
         $(document).on('click', '.badge-category', function () {
             const categoryId = $(this).data('category');
+            
+            // Send AJAX request to fetch YouTube links for the category
             $.ajax({
                 url: `/youtube-links/${categoryId}/`,
                 type: 'GET',
                 success: function (data) {
                     const youtubeLinksContainer = $('#youtubeLinksContainer');
-                    youtubeLinksContainer.empty();
-
-                    // Create Table
+                    youtubeLinksContainer.empty(); // Clear existing content
+        
+                    // Start table structure
                     let tableHtml = `
                         <table class="table table-bordered">
                             <thead>
@@ -438,46 +474,42 @@
                             </thead>
                             <tbody>
                     `;
-
+        
+                    // Loop through each YouTube link returned from the server
                     data.youtube_links.forEach(link => {
+                        // Add each link to the table
                         tableHtml += `
                             <tr>
                                 <td>
                                     <button class="btn btn-primary open-modal-btn" data-bs-toggle="modal" data-bs-target="#modal-${link.id}">Open</button>
                                 </td>
                                 <td>
-                                    <a href="${link.url}" target="_blank">${link.url}</a>
+                                    <a href="${link.url}" target="_blank">${link.title || 'No Title'}</a>
                                 </td>
                                 <td>
-                                    ${link.topics.map(topic => `<span class="badge bg-warning">${topic}</span>`).join(' ')}
+                                    ${link.topics.map(topic => `<span class="badge bg-warning">${topic.topic}</span>`).join(' ')}
                                 </td>
                                 <td>
-                                    ${link.questions.map(question => `<span class="badge bg-info">${question}</span>`).join(' ')}
+                                    ${link.questions.map(question => `<span class="badge bg-info">${question.question_text}</span>`).join(' ')}
                                 </td>
                                 <td>
-                                    ${link.subheadings.map(subheading => `<span class="badge bg-secondary">${subheading}</span>`).join('<br>')}
+                                    ${link.subheadings.map(subheading => `<a href="/subheading/${subheading.id}" class="badge bg-secondary">${subheading.title}</a>`).join('<br>')}
                                 </td>
                             </tr>
                         `;
-
-                        
-
-
-
-
-
-
-                        // Add Modal for each link
+        
+                        // Add a modal for each link
                         tableHtml += `
                             <div class="modal fade" id="modal-${link.id}" tabindex="-1" aria-labelledby="modalLabel-${link.id}" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="modalLabel-${link.id}">YouTube Link Details</h5>
+                                            <h5 class="modal-title" id="modalLabel-${link.id}">${link.title || 'No Title'}</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <h6>${link.title || 'No Title'}</h6>
+                                            <!-- Embedded Video -->
+                                            <h6>Video</h6>
                                             <div class="ratio ratio-16x9">
                                                 <iframe
                                                     src="https://www.youtube.com/embed/${link.embed_url_id}?enablejsapi=1"
@@ -486,9 +518,30 @@
                                                     allowfullscreen>
                                                 </iframe>
                                             </div>
-                                            <p><strong>Topics:</strong> ${link.topics.join(', ') || 'No Topics'}</p>
-                                            <p><strong>Questions:</strong> ${link.questions.join(', ') || 'No Questions'}</p>
-                                            <p><strong>Description:</strong> ${link.description || 'No Description'}</p>
+        
+                                            <!-- Topics with Timestamps -->
+                                            <h6 class="mt-4">Topics</h6>
+                                            <div class="border border-info rounded p-2">
+                                                ${link.topics.map(topic => {
+                                                    const timestamp = topic.youtube_timestamp ? `<span class="timestamp" data-time="${topic.youtube_timestamp}">${topic.youtube_timestamp}</span>` : '';
+                                                    return `<span class="badge bg-primary">${timestamp} ${topic.topic}</span><br>`;
+                                                }).join('')}
+                                            </div>
+        
+                                            <!-- Questions with Timestamps -->
+                                            <h6 class="mt-4">Questions</h6>
+                                            <div class="border border-info rounded p-2">
+                                                ${link.questions.map(question => {
+                                                    const timestamp = question.youtube_timestamp ? `<span class="timestamp" data-time="${question.youtube_timestamp}">${question.youtube_timestamp}</span>` : '';
+                                                    return `<span class="badge bg-info">${timestamp} ${question.question_text}</span><br>`;
+                                                }).join('')}
+                                            </div>
+        
+                                            <!-- Description -->
+                                            <h6 class="mt-4">Description</h6>
+                                            <div class="border border-success rounded p-2">
+                                                <p>${link.description || 'No Description'}</p>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -498,7 +551,8 @@
                             </div>
                         `;
                     });
-
+        
+                    // Close the table and append to the container
                     tableHtml += `</tbody></table>`;
                     youtubeLinksContainer.append(tableHtml);
                 },
@@ -507,6 +561,7 @@
                 }
             });
         });
+        
     });
 </script>
 

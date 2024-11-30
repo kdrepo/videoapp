@@ -7,24 +7,18 @@ from .models import Book, Chapter, Subheading, YouTubeLink, Category
 from django.http import JsonResponse
 
 
-
-def toc(request):
-    # books = Book.objects.prefetch_related(
-    #     'chapters__subheadings',
-    #     'chapters__youtube_links',
-    #     'chapters__subheadings__youtube_links',
-    # )
-    return render(request, 'books/toc.html')
-
-
+from django.shortcuts import render, get_object_or_404
+from .models import Book, Chapter, Subheading, YouTubeLink, Category
 
 
 def table_of_contents(request):
+    # Fetch books and prefetch related chapters, subheadings, and their associated youtube_links
     books = Book.objects.prefetch_related(
-        'chapters__subheadings',
-        'chapters__youtube_links',
-        'chapters__subheadings__youtube_links',
+        'chapters__subheadings',  # Prefetch subheadings related to each chapter
+        'chapters__subheadings__youtube_links_subheading',  # Prefetch youtube links associated with subheadings (correct related_name)
+        # 'chapters__youtubelink_set',  # Prefetch youtube links associated with chapters (using the default related_name)
     )
+
     return render(request, 'books/table_of_contents.html', {'books': books})
 
 
@@ -37,19 +31,20 @@ def subheading_detail(request, pk):
     subheading = get_object_or_404(Subheading, pk=pk)
 
     # Fetch YouTube links with their associated categories, topics, and questions
-    youtube_links = subheading.youtube_links.prefetch_related('categories', 'topics', 'questions')
-
-    books = Book.objects.prefetch_related(
-        'chapters__subheadings',
-        'chapters__youtube_links',
-        'chapters__subheadings__youtube_links',
-    )
+    youtube_links = subheading.youtube_links_subheading.prefetch_related('categories', 'topics', 'questions')
 
     return render(request, 'books/subheading_detail.html', {
         'subheading': subheading,
         'youtube_links': youtube_links,
-        'books': books,
     })
+
+
+
+
+
+
+
+
 
 
 
@@ -69,13 +64,35 @@ def get_categories(request):
     return JsonResponse({'categories': list(categories)})
 
 
+# def get_youtube_links_by_category(request, category_id):
+#     """
+#     Fetch and return YouTube links for a specific category, including subheadings.
+#     """
+#     try:
+#         category = get_object_or_404(Category, id=category_id)
+#         youtube_links = category.youtube_links_categories.prefetch_related('topics', 'questions', 'categories', 'subheadings')
+
+#         data = []
+#         for link in youtube_links:
+#             data.append({
+#                 'id': link.id,
+#                 'url': link.url,
+#                 'title': link.title or "No Title",
+#                 'description': link.description or "No Description",
+#                 'embed_url_id': link.embed_url_id(),
+#                 'topics': [topic.topic_title for topic in link.topics.all()],
+#                 'questions': [question.question_text for question in link.questions.all()],
+#                 'subheadings': [subheading.title for subheading in link.subheadings.all()],
+#             })
+#         return JsonResponse({'youtube_links': data})
+#     except Category.DoesNotExist:
+#         return JsonResponse({'error': 'Category not found'}, status=404)
+    
+
 def get_youtube_links_by_category(request, category_id):
-    """
-    Fetch and return YouTube links for a specific category, including subheadings.
-    """
     try:
         category = get_object_or_404(Category, id=category_id)
-        youtube_links = category.youtube_links.prefetch_related('topics', 'questions', 'categories', 'subheadings')
+        youtube_links = category.youtube_links_categories.prefetch_related('topics', 'questions', 'subheadings', 'categories' )
 
         data = []
         for link in youtube_links:
@@ -85,15 +102,13 @@ def get_youtube_links_by_category(request, category_id):
                 'title': link.title or "No Title",
                 'description': link.description or "No Description",
                 'embed_url_id': link.embed_url_id(),
-                'topics': [topic.topic for topic in link.topics.all()],
-                'questions': [question.question_text for question in link.questions.all()],
-                'subheadings': [subheading.title for subheading in link.subheadings.all()],
+                'topics': [{'topic': topic.topic_title, 'youtube_timestamp': topic.youtube_timestamp} for topic in link.topics.all()],
+                'questions': [{'question_text': question.question_text, 'youtube_timestamp': question.youtube_timestamp} for question in link.questions.all()],
+                'subheadings': [{'title': subheading.title, 'id': subheading.id} for subheading in link.subheadings.all()],
             })
         return JsonResponse({'youtube_links': data})
     except Category.DoesNotExist:
         return JsonResponse({'error': 'Category not found'}, status=404)
-    
-
 
 
 
@@ -112,7 +127,7 @@ def weighted_search(request):
 
     if query:
         # Define search vectors for related fields
-        topic_vector = SearchVector('topics__topic', weight='A')
+        topic_vector = SearchVector('topics__topic_title', weight='A')
         question_vector = SearchVector('questions__question_text', weight='A')
         search_vector_t = SearchVector('title', weight='A') + SearchVector('text', weight='B')
 
@@ -160,7 +175,7 @@ def weighted_search(request):
                     'title': chapter.title,
                     'text': chapter.text,
                     'headline': chapter.headline,
-                    'youtube_links': list(chapter.youtube_links.all()),
+                    # 'youtube_links': list(chapter.youtube_links.all()),
                     'breadcrumbs': f'Chapter: {chapter.title}'
                 })
             for subheading in subheadings:
@@ -170,8 +185,8 @@ def weighted_search(request):
                     'title': subheading.title,
                     'text': subheading.text,
                     'headline': subheading.headline,
-                    'youtube_links': list(subheading.youtube_links.all()),
-                    'count': subheading.youtube_links.count(),
+                    'youtube_links': list(subheading.youtube_links_subheading.all()),
+                    'count': subheading.youtube_links_subheading.count(),
                     'breadcrumbs': f'Chapter: {subheading.chapter.title} > Subheading: {subheading.title}'
                 })
 
