@@ -19,6 +19,8 @@ def table_of_contents(request):
         # 'chapters__youtubelink_set',  # Prefetch youtube links associated with chapters (using the default related_name)
     )
 
+    
+
     return render(request, 'books/table_of_contents.html', {'books': books})
 
 
@@ -31,11 +33,14 @@ def subheading_detail(request, pk):
     subheading = get_object_or_404(Subheading, pk=pk)
 
     # Fetch YouTube links with their associated categories, topics, and questions
-    youtube_links = subheading.youtube_links_subheading.prefetch_related('categories', 'topics', 'questions')
+    youtube_links = subheading.youtube_links_subheading.prefetch_related('topics', 'questions')
+
+    print(youtube_links)
 
     return render(request, 'books/subheading_detail.html', {
         'subheading': subheading,
         'youtube_links': youtube_links,
+        # 'top' : top,
     })
 
 
@@ -60,34 +65,10 @@ def get_categories(request):
     Fetch and return all categories.
     """
     categories = Category.objects.all().values('id', 'category')
-    print(categories)
+    # print(categories)
     return JsonResponse({'categories': list(categories)})
 
 
-# def get_youtube_links_by_category(request, category_id):
-#     """
-#     Fetch and return YouTube links for a specific category, including subheadings.
-#     """
-#     try:
-#         category = get_object_or_404(Category, id=category_id)
-#         youtube_links = category.youtube_links_categories.prefetch_related('topics', 'questions', 'categories', 'subheadings')
-
-#         data = []
-#         for link in youtube_links:
-#             data.append({
-#                 'id': link.id,
-#                 'url': link.url,
-#                 'title': link.title or "No Title",
-#                 'description': link.description or "No Description",
-#                 'embed_url_id': link.embed_url_id(),
-#                 'topics': [topic.topic_title for topic in link.topics.all()],
-#                 'questions': [question.question_text for question in link.questions.all()],
-#                 'subheadings': [subheading.title for subheading in link.subheadings.all()],
-#             })
-#         return JsonResponse({'youtube_links': data})
-#     except Category.DoesNotExist:
-#         return JsonResponse({'error': 'Category not found'}, status=404)
-    
 
 def get_youtube_links_by_category(request, category_id):
     try:
@@ -109,8 +90,6 @@ def get_youtube_links_by_category(request, category_id):
         return JsonResponse({'youtube_links': data})
     except Category.DoesNotExist:
         return JsonResponse({'error': 'Category not found'}, status=404)
-
-
 
 
 
@@ -168,16 +147,16 @@ def weighted_search(request):
                 ),
             ).filter(rank__gte=0.1).order_by('-rank')
 
-            # Combine results for Chapters and Subheadings
-            for chapter in chapters:
-                results_text_only.append({
-                    'type': 'chapter',
-                    'title': chapter.title,
-                    'text': chapter.text,
-                    'headline': chapter.headline,
-                    # 'youtube_links': list(chapter.youtube_links.all()),
-                    'breadcrumbs': f'Chapter: {chapter.title}'
-                })
+            ## Combine results for Chapters and Subheadings
+            # for chapter in chapters:
+            #     results_text_only.append({
+            #         'type': 'chapter',
+            #         'title': chapter.title,
+            #         'text': chapter.text,
+            #         'headline': chapter.headline,
+            #         # 'youtube_links': list(chapter.youtube_links.all()),
+            #         'breadcrumbs': f'Chapter: {chapter.title}'
+            #     })
             for subheading in subheadings:
                 results_text_only.append({
                     'type': 'subheading',
@@ -211,12 +190,12 @@ def weighted_search(request):
         ).filter(rank__gte=0.1).order_by('-rank')
 
         for match in matches:
-            results.append({
+            results.append({                
                 'match': match,
                 'topics': match.topics.all(),
                 'questions': match.questions.all(),
             })
-
+    
     # Render results for non-'onlytext' search types
     return render(
         request,
@@ -237,47 +216,47 @@ def weighted_search(request):
 
 
 
-def search(request):
-    query = request.GET.get('q')
-    results = []
+# def search(request):
+#     query = request.GET.get('q')
+#     results = []
 
-    if query:
-        # Build search vector and query
-        search_vector = SearchVector('title', weight='A') + SearchVector('text', weight='B')
-        search_query = SearchQuery(query)
+#     if query:
+#         # Build search vector and query
+#         search_vector = SearchVector('title', weight='A') + SearchVector('text', weight='B')
+#         search_query = SearchQuery(query)
 
-        # Search Chapters
-        chapters = Chapter.objects.annotate(
-            rank=SearchRank(search_vector, search_query),
-            headline=SearchHeadline('text', search_query, start_sel='<mark class="badge text-bg-success">', stop_sel='</b>', max_words=300, min_words=50)
-        ).filter(rank__gte=0.1).order_by('-rank')
+#         # Search Chapters
+#         chapters = Chapter.objects.annotate(
+#             rank=SearchRank(search_vector, search_query),
+#             headline=SearchHeadline('text', search_query, start_sel='<mark class="badge text-bg-success">', stop_sel='</b>', max_words=300, min_words=50)
+#         ).filter(rank__gte=0.1).order_by('-rank')
 
-        # Search Subheadings
-        subheadings = Subheading.objects.annotate(
-            rank=SearchRank(search_vector, search_query),
-            headline=SearchHeadline('text', search_query, start_sel='<mark class="badge text-bg-success">', stop_sel='</b>''</mark>', max_words=300, min_words=50)
-        ).filter(rank__gte=0.1).order_by('-rank')
+#         # Search Subheadings
+#         subheadings = Subheading.objects.annotate(
+#             rank=SearchRank(search_vector, search_query),
+#             headline=SearchHeadline('text', search_query, start_sel='<mark class="badge text-bg-success">', stop_sel='</b>''</mark>', max_words=300, min_words=50)
+#         ).filter(rank__gte=0.1).order_by('-rank')
 
-        # Combine results with YouTube links
-        for chapter in chapters:
-            results.append({
-                'type': 'chapter',
-                'title': chapter.title,
-                'text': chapter.text,
-                'headline': chapter.headline,
-                'youtube_links': list(chapter.youtube_links.all()),
-                'breadcrumbs': f'Chapter: {chapter.title}'
-            })
-        for subheading in subheadings:
-            results.append({
-                'type': 'subheading',
-                'id': subheading.id,
-                'title': subheading.title,
-                'text': subheading.text,
-                'headline': subheading.headline,
-                'youtube_links': list(subheading.youtube_links.all()),
-                'breadcrumbs': f'Chapter: {subheading.chapter.title} > Subheading: {subheading.title}'
-            })
+#         # Combine results with YouTube links
+#         for chapter in chapters:
+#             results.append({
+#                 'type': 'chapter',
+#                 'title': chapter.title,
+#                 'text': chapter.text,
+#                 'headline': chapter.headline,
+#                 'youtube_links': list(chapter.youtube_links.all()),
+#                 'breadcrumbs': f'Chapter: {chapter.title}'
+#             })
+#         for subheading in subheadings:
+#             results.append({
+#                 'type': 'subheading',
+#                 'id': subheading.id,
+#                 'title': subheading.title,
+#                 'text': subheading.text,
+#                 'headline': subheading.headline,
+#                 'youtube_links': list(subheading.youtube_links.all()),
+#                 'breadcrumbs': f'Chapter: {subheading.chapter.title} > Subheading: {subheading.title}'
+#             })
 
-    return render(request, 'books/search_results.html', {'results': results, 'query': query})
+#     return render(request, 'books/search_results.html', {'results': results, 'query': query})
 

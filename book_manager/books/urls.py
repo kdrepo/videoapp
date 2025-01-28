@@ -5,7 +5,7 @@ urlpatterns = [
     path('', views.table_of_contents, name='home'),
     path('chapter/<int:pk>/', views.chapter_detail, name='chapter_detail'),
     path('subheading/<int:pk>/', views.subheading_detail, name='subheading_detail'),
-    path('search/', views.search, name='search'),
+    # path('search/', views.search, name='search'),
     # path('toc/', views.toc, name='toc'),
     # Other URL patterns
     path('search-options/', views.search_options, name='search_options'),

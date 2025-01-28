@@ -146,7 +146,7 @@
                             {% for subheading in result.match.subheadings.all %}
                                 <a href="{% url 'subheading_detail' subheading.id %}" class="badge bg-primary text-decoration-none">
                                     {{ subheading.title }}
-                                </a>
+                                </a><br>
                             {% endfor %}
                         {% else %}
                             <span class="text-muted">No Subheadings</span>
@@ -194,8 +194,8 @@
                             <div class="modal-body">
                                 <!-- Embedded YouTube Video -->
                                 <div class="ratio ratio-16x9">
-                                    <iframe
-                                        id="youtube-{{ result.match.id }}"
+                                    <iframe 
+                                        id="youtube-{{ result.match.id }}" class="youtube-video"
                                         src="https://www.youtube.com/embed/{{ result.match.embed_url_id }}?enablejsapi=1"
                                         frameborder="0"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -208,13 +208,13 @@
                                 <div class="border border-info rounded p-2">
                                     {% if result.topics %}
                                         {% for topic in result.topics %}
-                                        <span class="badge bg-primary timestamp">
+                                        <span class="badge bg-primary">
                                             {% if topic.youtube_timestamp %}
                                                 <span class="timestamp"
                                                       data-time="{{ topic.youtube_timestamp }}"
-                                                      data-iframe="youtube-{{ link.id }}">
-                                                    {{ topic.youtube_timestamp }}
-                                                </span> -
+                                                      data-iframe="youtube-{{ result.match.id }}">
+                                                    {{ topic.youtube_timestamp }} 
+                                                </span>
                                             {% endif %}
                                             {{ topic.topic_title }}
                                         </span><br>
@@ -229,13 +229,13 @@
                                 <div class="border border-info rounded p-2">
                                     {% if result.questions %}
                                         {% for question in result.questions %}
-                                        <span class="badge bg-primary timestamp">
+                                        <span class="badge bg-info">
                                             {% if question.youtube_timestamp %}
                                                 <span class="timestamp"
-                                                      data-time="{{ topic.youtube_timestamp }}"
-                                                      data-iframe="youtube-{{ link.id }}">
-                                                    {{ topic.youtube_timestamp }}
-                                                </span> -
+                                                      data-time="{{ question.youtube_timestamp }}"
+                                                      data-iframe="youtube-{{ result.match.id }}">
+                                                    {{ question.youtube_timestamp }}
+                                                </span>
                                             {% endif %}
                                             {{ question.question_text }}
                                         </span><br>
@@ -290,7 +290,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
                         {% if result.type == "chapter" %}
-                        <a href="{% url 'chapter_detail' result.id %}">{{ result.breadcrumbs }}</a>
+                        {{ result.breadcrumbs }}
                         {% elif result.type == "subheading" %}
                         <a href="{% url 'subheading_detail' result.id %}">{{ result.breadcrumbs }}</a>
                         {% endif %}
@@ -303,9 +303,9 @@
 
             <!-- Title -->
             <h5>
-                {% if result.type == "chapter" %}
-                <a href="{% url 'chapter_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a>
-                {% elif result.type == "subheading" %}
+                {% comment %} {% if result.type == "chapter" %}
+                <a href="{% url 'chapter_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a> {% endcomment %}
+                {% if result.type == "subheading" %}
                 <a href="{% url 'subheading_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a>
                 {% endif %}
             </h5>
@@ -352,53 +352,57 @@
 
 
 
+
+
 <script>
-    let players = {};
+    const players = {}; // Store player instances
 
     // Initialize YouTube API dynamically
     function onYouTubeIframeAPIReady() {
-        document.querySelectorAll('iframe[id^="youtube-"]').forEach(iframe => {
+        document.querySelectorAll('iframe.youtube-video').forEach(iframe => {
             const iframeId = iframe.getAttribute('id');
-            if (!players[iframeId]) {
-                players[iframeId] = new YT.Player(iframeId);
-            }
+            players[iframeId] = new YT.Player(iframeId);  // Initialize players for all iframe videos
         });
     }
-
+    
     // Handle timestamp clicks
     document.addEventListener('click', (event) => {
         if (event.target.classList.contains('timestamp')) {
             const time = event.target.getAttribute('data-time');
-            const iframeId = event.target.getAttribute('data-iframe');
+            const iframeId = event.target.getAttribute('data-iframe'); // Get the iframe ID associated with this timestamp
+    
+            // Split the time string (HH:MM:SS) and convert it into total seconds
             const [hours, minutes, seconds] = time.split(':').map(Number);
             const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-
+    
+            // If the iframe corresponding to this timestamp exists, seek to the specified time
             if (players[iframeId]) {
-                players[iframeId].seekTo(totalSeconds, true);
+                players[iframeId].seekTo(totalSeconds, true); // Seek to the exact time
+                players[iframeId].playVideo();  // Play the video after seeking
             }
         }
     });
-
+    
     // Dynamically load YouTube API script
     const script = document.createElement('script');
     script.src = "https://www.youtube.com/iframe_api";
     document.body.appendChild(script);
-
+    
     // Stop video playback when modal is closed
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('hidden.bs.modal', () => {
-            const iframe = modal.querySelector('iframe');
+            const iframe = modal.querySelector('iframe.youtube-video');
             if (iframe && players[iframe.id]) {
-                players[iframe.id].stopVideo();
+                players[iframe.id].stopVideo();  // Stop video when the modal is closed
             }
         });
     });
+    
 </script>
 
 
 
-
-    
+   
 
 
 
@@ -465,11 +469,11 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Open</th>
-                                    <th>Class Link</th>
-                                    <th>Topics</th>
-                                    <th>Questions</th>
+                                    {% comment %} <th>Open</th> {% endcomment %}
                                     <th>Subheadings</th>
+                                    <th>Topics</th>
+                                    <th>Questions</th>                                    
+                                    <th>Class Link</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -480,21 +484,24 @@
                         // Add each link to the table
                         tableHtml += `
                             <tr>
-                                <td>
+                                {% comment %} <td>
                                     <button class="btn btn-primary open-modal-btn" data-bs-toggle="modal" data-bs-target="#modal-${link.id}">Open</button>
-                                </td>
+                                </td> {% endcomment %}
                                 <td>
-                                    <a href="${link.url}" target="_blank">${link.title || 'No Title'}</a>
-                                </td>
+                                    ${link.subheadings.map(subheading => `<a href="/subheading/${subheading.id}" class="badge bg-secondary">${subheading.title}</a>`).join('<br>')}
+                                </td>                                
+
+
                                 <td>
                                     ${link.topics.map(topic => `<span class="badge bg-warning">${topic.topic}</span>`).join(' ')}
                                 </td>
                                 <td>
                                     ${link.questions.map(question => `<span class="badge bg-info">${question.question_text}</span>`).join(' ')}
                                 </td>
-                                <td>
-                                    ${link.subheadings.map(subheading => `<a href="/subheading/${subheading.id}" class="badge bg-secondary">${subheading.title}</a>`).join('<br>')}
+                                                                <td>
+                                    <a href="${link.url}" target="_blank">${link.title || 'No Title'}</a>
                                 </td>
+
                             </tr>
                         `;
         
@@ -512,6 +519,7 @@
                                             <h6>Video</h6>
                                             <div class="ratio ratio-16x9">
                                                 <iframe
+                                                    id="youtube-${link.id}" class="youtube-video"
                                                     src="https://www.youtube.com/embed/${link.embed_url_id}?enablejsapi=1"
                                                     frameborder="0"
                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -561,9 +569,11 @@
                 }
             });
         });
-        
-    });
+           
+
+});
 </script>
+
 
 
 

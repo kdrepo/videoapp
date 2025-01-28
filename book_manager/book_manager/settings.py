@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 'django_elasticsearch_dsl',
     'books',
+    'import_export',
     
 ]
 
@@ -92,7 +93,7 @@ WSGI_APPLICATION = 'book_manager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'newdb', 
+        'NAME': 'pdb', 
         'USER': 'postgres',
         'PASSWORD': 'killer',
         'HOST': '127.0.0.1', 
