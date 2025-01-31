@@ -1,9 +1,6 @@
 {% extends "books/base_generic.html" %}
 
 
-
-
-
 {% block content %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,133 +15,106 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-        .badge {
-            font-size: 0.8rem;
-            font-weight: 400;
-            padding: 0.4em 0.65em;
-            margin: 1.5px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            color: #ffffff;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-
-        .rounded {
+        /* Styling for result cards */
+        .result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: background-color 0.3s;
         }
 
         /* Styling for breadcrumb navigation */
         .breadcrumb {
-            background-color:rgb(243, 244, 239);
+            background-color: #e3d9bc;
             border-radius: 5px;
             padding: 8px 15px;
         }
 
         .breadcrumb-item a {
             text-decoration: none;
-            color:rgb(94, 188, 243);
+            color: #007bff;
         }
 
         .breadcrumb-item a:hover {
             text-decoration: underline;
         }
-        .dark-mode .breadcrumb-item{
-            color:rgb(154, 154, 154);
 
-        }
-        .textPadding {
-            padding-left: 20px;
+        /* Styling for YouTube links list */
+        .youtube-links {
+            list-style-type: none;
+            padding-left: 0;
         }
 
+        .youtube-links li {
+            margin-bottom: 5px;
+        }
+
+        .badge-category {
+            cursor: pointer;
+            margin: 5px;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
         body {
-            background-color:#f8f9fa;
-            color: #212529;
-            transition: all 0.3s ease;
+            background-color: #f8f9fa;
         }
-
-
-
     </style>
 
 
 
-
     
-<div class="container my-5 p-4 shadow rounded">
-    <div class="container p-4 shadow rounded">
+<div class="container my-5 p-4 shadow rounded bg-white">
+    <div class="container p-4 shadow rounded bg-white">
     <h2>Search</h2>
     
     <!-- Search Form -->
     <form method="get" action="{% url 'weighted_search' %}" class="row g-3 align-items-center">
-        <div class="col-md-9 d-flex align-items-center">
+        <!-- Search Input and Button -->
+        <div class="col-md-8">
             <div class="input-group">
-                <!-- Dropdown for Search Type -->
-                <div class="input-group-prepend">
-                    <select class="form-select" name="search_type" style="width: auto; min-width: 120px;">
-                        <option value="topics" {% if search_type == "topics" %}selected{% endif %}>Topics</option>
-                        <option value="questions" {% if search_type == "questions" %}selected{% endif %}>Questions</option>
-                        <option value="textonly" {% if search_type == "textonly" %}selected{% endif %}>Text</option>
-                    </select>
-                </div>
-                
-                <!-- Search Input -->
                 <input type="text" name="query" class="form-control" placeholder="Enter your search term..." value="{{ query }}">
-                
-                <!-- Search Button -->
                 <button type="submit" class="btn btn-primary">Search</button>
             </div>
         </div>
     
-        <!-- Vertical Line Separator -->
-        <div class="col-auto d-flex align-items-center">
-            <div style="border-left: 1px solid #999; height: 100%; margin-left: 10px; margin-right: 10px;"></div>
+        <!-- Radio Buttons for Search Type -->
+        <div class="col-md-12">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-topics" value="topics" {% if search_type == "topics" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-topics">Topics</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-questions" value="questions" {% if search_type == "questions" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-questions">Questions</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-combined" value="general" {% if search_type == "general" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-combined">General</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-textonly" value="textonly" {% if search_type == "textonly" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-textonly">Text</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="listCategories" name="cat_search_Type" value="categories"  {% if search_type == "categories" %}checked{% endif %}> 
+                <label class="form-check-label" for="listCategories"> List Categories</label>
+            </div>
+            
         </div>
-    
-         <!-- Checkboxes Section -->
-    <div class="col-auto d-flex flex-column">
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="listCategories" name="cat_search_Type" value="categories"> 
-            <label class="form-check-label" for="listCategories">List All Categories</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="listTopics" name="cat_search_Type" value="topics"> 
-            <label class="form-check-label" for="listTopics">List All Topics</label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="listQuestions" name="cat_search_Type" value="questions"> 
-            <label class="form-check-label" for="listQuestions">List All Questions</label>
-        </div>
-    </div>
-</form>
-
-    
-    
-    
-    
+    </form>
 </div>
 
 
         {% comment %} <div> Your Serach Results Under <span class="badge bg-danger"> {{ search_type }} category </span></div> {% endcomment %}
-        <div class="container my-3">
+        <div class="container my-5">
         <!-- Category Badges -->
-        <div id="categoriesContainer" class="mb-2"></div> 
+        <div id="categoriesContainer" class="mb-4"></div> 
     
         <!-- Table for YouTube Links -->
         <div id="youtubeLinksContainer" class="table-container table-responsive"></div>
-</div>  
+    </div>  
 
 
     
@@ -152,7 +122,7 @@
     {% if results %}
     <!-- Results Table -->
     <div id='result_div'>
-    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }}</span></div>
+    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }} category </span></div>
     <div class="table-responsive mt-4">
         <table class="table table-bordered">
             <thead>
@@ -161,7 +131,7 @@
                     <th>Subheadings Link</th>                    
                     <th>Topics</th>
                     <th>Questions</th>                    
-                    <th>Listen</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -223,7 +193,6 @@
                             </div>
                             <div class="modal-body">
                                 <!-- Embedded YouTube Video -->
-                                <div class="border border-dark rounded p-2 mb-3">
                                 <div class="ratio ratio-16x9">
                                     <iframe 
                                         id="youtube-{{ result.match.id }}" class="youtube-video"
@@ -232,7 +201,6 @@
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                         allowfullscreen>
                                     </iframe>
-                                </div>
                                 </div>
 
                                 <!-- Topics with Timestamps -->
@@ -249,14 +217,14 @@
                                                 </span>
                                             {% endif %}
                                             {{ topic.topic_title }}
-                                        </span>
+                                        </span><br>
                                         {% endfor %}
                                     {% else %}
                                         <p class="text-muted">No Topics</p>
                                     {% endif %}
                                 </div>
 
-                                <!-- Questions with Timestamps -->
+<!-- Questions with Timestamps -->
                                 <h6 class="mt-3">Questions with Timestamps</h6>
                                 <div class="border border-info rounded p-2">
                                     {% if result.questions %}
@@ -312,11 +280,11 @@
     {% elif results_text_only %}
     <!-- Text-Only Results -->
     <div id="text_div_to_hide">
-    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }}</span></div><br>
+    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }} category </span></div><br>
     
     <ul class="list-group">
         {% for result in results_text_only %}
-        <li class="list-group-item result-card mb-3">
+        <li class="list-group-item result-card">
             <!-- Breadcrumb Navigation -->
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
@@ -338,25 +306,33 @@
                 {% comment %} {% if result.type == "chapter" %}
                 <a href="{% url 'chapter_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a> {% endcomment %}
                 {% if result.type == "subheading" %}
-                <a href="{% url 'subheading_detail' result.id %}" class="text-decoration-none textPadding">{{ result.title }}</a>
+                <a href="{% url 'subheading_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a>
                 {% endif %}
             </h5>
 
             <!-- Description -->
-            <p class="textPadding">
+            <p>
                 {{ result.headline|safe|truncatewords:50 }}
-            
             </p>
+
             <!-- YouTube Links -->
            {% if result.youtube_links %}           
-           <span class ="textPadding"> <span class="badge bg-success"> Classes: {{ result.count }} </span>    </span>  
+            <span class="badge bg-secondary"> Classes: {{ result.count }} </span>    
            {% endif %}  
-        
         </li>
         {% endfor %}
     </ul>
     
     </div>   
+
+
+
+
+    
+
+    
+    
+
     
     {% else %}
     <!-- No Results Found -->
@@ -444,11 +420,9 @@
                         const divtohide = $('#divtohide');
                         const result_div = $('#result_div');
                         const text_div_to_hide = $('#text_div_to_hide');
-                       
                         divtohide.hide();
                         result_div.hide();
                         text_div_to_hide.hide();
-                        
                         categoriesContainer.empty();
                         categoriesContainer.css({
                             'border': '1px solid #007bff',
@@ -489,7 +463,7 @@
                 success: function (data) {
                     const youtubeLinksContainer = $('#youtubeLinksContainer');
                     youtubeLinksContainer.empty(); // Clear existing content
-                   
+        
                     // Start table structure
                     let tableHtml = `
                         <table class="table table-bordered">
@@ -605,208 +579,5 @@
 
 
 
- <script>
-    $(document).ready(function () {
-        function uncheckOthers(checkedId) {
-            $("input[type='checkbox']").not('#' + checkedId).prop('checked', false);
-            $('#categoriesContainer').empty();
-            $('#youtubeLinksContainer').empty();
-        }
-
-        // Handle List Categories Checkbox
-        $('#listCategories').on('change', function () {
-            if (this.checked) {
-                uncheckOthers('listCategories');
-                $.ajax({
-                    url: '/categories/',
-                    type: 'GET',
-                    success: function (data) {
-                        const categoriesContainer = $('#categoriesContainer');
-                        categoriesContainer.empty().css({'border': '1px solid #007bff', 'padding': '10px', 'border-radius': '5px'});
-                        data.categories.forEach(category => {
-                            categoriesContainer.append(`<span class="badge bg-primary badge-category" data-category="${category.id}">${category.category}</span>`);
-                        });
-                    },
-                    error: function () {
-                        alert('Error fetching categories');
-                    }
-                });
-            }
-        });
-
-        // Handle List Topics Checkbox
-        $('#listTopics').on('change', function () {
-            if (this.checked) {
-                uncheckOthers('listTopics');
-                $.ajax({
-                    url: '/topics/',
-                    type: 'GET',
-                    success: function (data) {
-                        const topicsContainer = $('#categoriesContainer');
-
-                        const divtohide = $('#divtohide');
-                        const result_div = $('#result_div');
-                        const text_div_to_hide = $('#text_div_to_hide');
-                       
-                        divtohide.hide();
-                        result_div.hide();
-                        text_div_to_hide.hide();
-
-                        topicsContainer.empty();
-                        topicsContainer.css({
-                            'border': '1px solid #007bff', 
-                            'padding': '10px', 
-                            'border-radius': '5px'
-                        });
-
-                        data.topics.forEach(topic => {
-                            topicsContainer.append(`<span class="badge bg-success badge-topic" data-topic="${topic}" style="margin: 5px;">${topic}</span>`);
-                        });
-                    },
-                    error: function () {
-                        alert('Error fetching topics');
-                    }
-                });
-            } else {
-                $('#categoriesContainer').empty();
-                $('#youtubeLinksContainer').empty();
-                $('#categoriesContainer').css({
-                    'border': '',
-                    'padding': '',
-                    'border-radius': ''
-                }).empty();
-                
-            }
-        });
-
-        // Handle List Questions Checkbox
-        $('#listQuestions').on('change', function () {
-            if (this.checked) {
-                uncheckOthers('listQuestions');
-                $.ajax({
-                    url: '/questions/',
-                    type: 'GET',
-                    success: function (data) {
-                        const questionsContainer = $('#categoriesContainer');
-                        const divtohide = $('#divtohide');
-                        const result_div = $('#result_div');
-                        const text_div_to_hide = $('#text_div_to_hide');
-                       
-                        divtohide.hide();
-                        result_div.hide();
-                        text_div_to_hide.hide();
-
-                        questionsContainer.empty()
-                        questionsContainer.css({
-                            'border': '1px solid #007bff', 
-                            'padding': '10px', 
-                            'border-radius': '5px'
-                        });
-
-                        data.questions.forEach(question => {
-                            questionsContainer.append(`<span class="badge bg-info badge-question" data-question="${question}" style="margin: 5px;">${question}</span>`);
-                        });
-                    },
-                    error: function () {
-                        alert('Error fetching questions');
-                    }
-                });
-            } else {
-                $('#categoriesContainer').empty();
-                $('#youtubeLinksContainer').empty();
-                $('#categoriesContainer').css({
-                    'border': '',
-                    'padding': '',
-                    'border-radius': ''
-                }).empty();
-                
-            }
-        });
-
-        // Handle Badge Clicks for Topics and Questions
-        $(document).on('click', '.badge-topic', function () {
-            fetchYouTubeLinks(`/youtube-links/topic/${$(this).data('topic')}/`);
-        });
-        
-        $(document).on('click', '.badge-question', function () {
-            fetchYouTubeLinks(`/youtube-links/question/${$(this).data('question')}/`);
-        });
-
-        function fetchYouTubeLinks(url) {
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function (data) {
-                    displayResultsTable(data.youtube_links);
-                },
-                error: function () {
-                    alert('Error fetching YouTube links');
-                }
-            });
-        }
-
-        function displayResultsTable(youtubeLinks) {
-            const youtubeLinksContainer = $('#youtubeLinksContainer');
-            youtubeLinksContainer.empty();
-            let tableHtml = `<table class="table table-bordered"><thead><tr><th>Subheadings</th><th>Topics</th><th>Questions</th><th>Class Link</th></tr></thead><tbody>`;
-            youtubeLinks.forEach(link => {
-                tableHtml += `<tr>
-                    <td>${link.subheadings.map(sub => `<a href="/subheading/${sub.id}" class="badge bg-secondary">${sub.title}</a>`).join('<br>')}</td>
-                    <td>${link.topics.map(topic => `<span class="badge bg-warning">${topic.topic}</span>`).join(' ')}</td>
-                    <td>${link.questions.map(q => `<span class="badge bg-info">${q.question_text}</span>`).join(' ')}</td>
-                    <td><a href="${link.url}" target="_blank">${link.title || 'No Title'}</a></td>
-                </tr>`;
-            });
-            tableHtml += `</tbody></table>`;
-            youtubeLinksContainer.append(tableHtml);
-        }
-    });
-</script>
-
-
-
-
-<script>
-    // Function to toggle dark mode
-    function toggleDarkMode() {
-      const body = document.body;
-      body.classList.toggle("dark-mode");
-
-      const darkModeToggle = document.getElementById("darkModeToggle");
-      if (body.classList.contains("dark-mode")) {
-        darkModeToggle.textContent = "☀️"; // Sun icon for light mode
-        localStorage.setItem("darkMode", "enabled");
-      } else {
-        darkModeToggle.textContent = "🌙"; // Moon icon for dark mode
-        localStorage.setItem("darkMode", "disabled");
-      }
-    }
-
-    // Check localStorage for dark mode preference on page load
-    document.addEventListener("DOMContentLoaded", function () {
-      const darkModeToggle = document.getElementById("darkModeToggle");
-      const isDarkMode = localStorage.getItem("darkMode") === "enabled";
-
-      if (isDarkMode) {
-        document.body.classList.add("dark-mode");
-        darkModeToggle.textContent = "☀️";
-      } else {
-        document.body.classList.remove("dark-mode");
-        darkModeToggle.textContent = "🌙";
-      }
-
-      // Add event listener to the toggle button
-      darkModeToggle.addEventListener("click", toggleDarkMode);
-    });
-  </script>
-
-
-
-
-
-
-
 
 {% endblock %}
-
-

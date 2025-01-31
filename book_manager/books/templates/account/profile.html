@@ -1,0 +1,49 @@
+{% extends "books/base_generic.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+.dark-mode .col-md-3 {
+    background-color: #1e1e1e;
+}
+.dark-mode .col-md-6 {
+    background-color: #1e1e1e;
+}
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<div class="mt-5">
+    <div class="row justify-content-center">
+        
+        <!-- Profile Column -->
+        <div class="col-md-3 col-sm-6 p-4 mt-2 rounded shadow text-center">
+            {% if user.socialaccount_set.all %}
+                {% for socialaccount in user.socialaccount_set.all %}
+                    <img src="{{ socialaccount.get_avatar_url }}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
+                {% endfor %}
+            {% else %}
+                <img src="{% static 'images/default-profile.png' %}" class="rounded-circle mb-3" width="120" height="120" alt="Default Profile">
+            {% endif %}
+            
+            <h4>{{ user.get_full_name|default:user.username }}</h4>
+            <p class="text-muted">{{ user.email }}</p>
+            
+            <a href="{% url 'account_logout' %}" class="btn btn-danger">Logout</a>
+        </div>
+
+        <!-- Vertical Divider -->
+        <div class="col-auto d-flex align-items-center">
+            <div class="vertical-hr"></div>
+        </div>
+
+        <!-- Additional Column -->
+        <div class="col-md-6 col-sm-12 p-4 mt-2 rounded shadow">
+            <h3 class="text-center">Additional Information</h3>
+            <p class="text-muted text-center">This section can include user details, BooksMarks, questions asked on webite etc. </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

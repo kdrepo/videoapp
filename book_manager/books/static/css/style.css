@@ -1,0 +1,283 @@
+
+
+        /* Light Mode Styles */
+        body {
+            background-color: #f7f6e1;
+            color: #343a40;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s;
+        } */
+
+        h1, h2, h3, h5 {
+            color: #343a40;
+            transition: color 0.3s;
+        }
+
+        .table {
+            background-color: #ffffff;
+            transition: background-color 0.3s;
+        }
+
+        .table thead {
+            background-color: #e9ecef;
+            color: #6c757d;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .table tbody tr:nth-child(odd) {
+            background-color: #f8f9fa;
+            transition: background-color 0.3s;
+        }
+
+
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #ffffff;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            transition: background-color 0.3s;
+        }
+
+        .modal-header {
+            background-color: #e9ecef;
+            color: #343a40;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .modal-body {
+            background-color: #ffffff;
+            transition: background-color 0.3s;
+        }
+
+        .modal-footer {
+            background-color: #f8f9fa;
+            transition: background-color 0.3s;
+        }
+
+        .ratio {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+            transition: color 0.3s;
+        }
+/* 
+        body {
+            background-color:rgb(243, 244, 239);
+            color: #343a40;
+            transition: background-color 0.3s, color 0.3s;
+        } */
+
+
+
+        /* Dark Mode Styles */
+        .dark-mode .border-info, .dark-mode .border-primary, .dark-mode .border-dark {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        .dark-mode body {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .container {
+            background-color: #1e1e1e;
+        }
+
+        .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h5 {
+            color: #e0e0e0;
+        }
+
+        .dark-mode .table {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .table thead {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .table tbody tr:nth-child(odd) {
+            background-color: #2d2d2d;
+        }
+
+        .dark-mode .btn-primary {
+            background-color: #1e90ff;
+            border-color: #1e90ff;
+        }
+
+        .dark-mode .btn-primary:hover {
+            background-color: #0077cc;
+            border-color: #0077cc;
+        }
+
+        .dark-mode .modal-content {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .modal-header {
+            background-color: #3d3d3d;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .modal-body {
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .modal-footer {
+            background-color: #3d3d3d;
+        }
+
+        .dark-mode .ratio {
+            border-color: #4d4d4d;
+        }
+
+        .dark-mode .text-muted {
+            color: #a0a0a0 !important;
+        }
+
+        /* Dark Mode Toggle Button */
+
+
+
+
+
+
+
+
+
+
+
+
+         /* Styling for result cards */
+         .result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 0px;
+            background-color: #ffffff;
+        }
+
+        
+
+        /* Styling for YouTube links list */
+        .youtube-links {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .youtube-links li {
+            margin-bottom: 5px;
+        }
+
+        .badge-category {
+            cursor: pointer;
+            margin: 5px;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
+
+
+
+
+        /* Dark mode styles */
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .dark-mode .container {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .dark-mode .result-card {
+            background-color: #2d2d2d;
+            border-color: #444;
+        }
+
+        .dark-mode .breadcrumb {
+            background-color: #333;
+        }
+        .dark-mode .breadcrumb-item{
+            color: #ffffff;
+
+        }
+
+        .dark-mode .badge {
+            color: #fff;
+        }
+
+        .dark-mode .modal-content {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        .dark-mode .modal-header, .dark-mode .modal-footer {
+            border-color: #444;
+        }
+
+        .dark-mode .table {
+            color: #ffffff;
+        }
+
+        .dark-mode .table-bordered {
+            border-color: #444;
+        }
+
+        .dark-mode .table-bordered th, .dark-mode .table-bordered td {
+            border-color: #444;
+        }
+
+        .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h5, .dark-mode p {
+            color: #e0e0e0;
+        }
+        .dark-mode .text-muted {
+            color: #d4d4d4 !important;
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 700px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #007bff;
+            border: none;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: #0056b3;
+        }
+
+

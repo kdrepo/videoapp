@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,8 +42,22 @@ INSTALLED_APPS = [
     # 'django_elasticsearch_dsl',
     'books',
     'import_export',
+    'crispy_bootstrap5',  # If using Bootstrap 5
+    'crispy_forms',  # Enable Crispy Forms
+
+    # AllAuth apps
+    'django.contrib.sites',  # Required for Django-AllAuth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',  # Google Login Provider
     
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+
+ACCOUNT_FORMS = {'login': 'books.forms.CustomLoginForm'}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -50,6 +65,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # Add this line
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -59,6 +75,7 @@ ROOT_URLCONF = 'book_manager.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Ensure Django looks for custom templates
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -66,13 +83,40 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request',  # Required for Django-AllAuth
                 'django.contrib.messages.context_processors.messages',
+                
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'book_manager.wsgi.application'
+
+
+SITE_ID = 2  # Required for allauth
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+
+# Redirect to home page after login
+LOGIN_REDIRECT_URL = '/'
+
+# Don't ask for username, use email instead
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+
+# Email verification (optional)
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # or 'optional' or 'none'
+
+ACCOUNT_LOGOUT_REDIRECT_URL = '/'  # Redirect after logout
+ACCOUNT_LOGOUT_ON_GET = True 
+ACCOUNT_SIGNUP_REDIRECT_URL = "/profile/"  # Redirect after signup
+ACCOUNT_LOGIN_REDIRECT_URL = "/profile/"   # Redirect after login
 
 
 # Database
@@ -146,6 +190,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+STATICFILES_DIRS = [
+    BASE_DIR / "books/static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

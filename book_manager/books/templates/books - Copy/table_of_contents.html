@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -174,35 +172,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Function to toggle dark mode
-        function toggleDarkMode() {
-          const body = document.body;
-          body.classList.toggle("dark-mode");
-  
-          const darkModeToggle = document.getElementById("darkModeToggle");
-          if (body.classList.contains("dark-mode")) {
-            darkModeToggle.textContent = "☀️"; // Sun icon for light mode
-            localStorage.setItem("darkMode", "enabled");
-          } else {
-            darkModeToggle.textContent = "🌙"; // Moon icon for dark mode
-            localStorage.setItem("darkMode", "disabled");
-          }
-        }
-  
-        // Check localStorage for dark mode preference on page load
-        document.addEventListener("DOMContentLoaded", function () {
-          const darkModeToggle = document.getElementById("darkModeToggle");
-          const isDarkMode = localStorage.getItem("darkMode") === "enabled";
-  
-          if (isDarkMode) {
-            document.body.classList.add("dark-mode");
-            darkModeToggle.textContent = "☀️";
-          } else {
-            document.body.classList.remove("dark-mode");
-            darkModeToggle.textContent = "🌙";
-          }
-  
-          // Add event listener to the toggle button
-          darkModeToggle.addEventListener("click", toggleDarkMode);
-        });
-      </script>
+        // Dark Mode Toggle functionality
+        const darkModeButton = document.getElementById('darkModeToggle');
+        darkModeButton.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');  // Toggle dark mode class on body
+            const icon = darkModeButton.querySelector

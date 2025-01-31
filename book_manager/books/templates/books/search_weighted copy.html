@@ -1,0 +1,1144 @@
+{% extends "books/base_generic.html" %}
+{% comment %} {% extends "books/base_generic.html" %}
+
+{% block content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weighted Search</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        /* Styling for result cards */
+        .result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+        }
+
+        /* Styling for breadcrumb navigation */
+        .breadcrumb {
+            background-color: #e3d9bc;
+            border-radius: 5px;
+            padding: 8px 15px;
+        }
+
+        .breadcrumb-item a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Styling for YouTube links list */
+        .youtube-links {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .youtube-links li {
+            margin-bottom: 5px;
+        }
+
+        .badge-category {
+            cursor: pointer;
+            margin: 5px;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+
+
+
+
+        /* Dark mode styles */
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .dark-mode .container {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .dark-mode .result-card {
+            background-color: #2d2d2d;
+            border-color: #444;
+        }
+
+        .dark-mode .breadcrumb {
+            background-color: #333;
+        }
+
+        .dark-mode .badge {
+            color: #fff;
+        }
+
+        .dark-mode .modal-content {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        .dark-mode .modal-header, .dark-mode .modal-footer {
+            border-color: #444;
+        }
+
+        .dark-mode .table {
+            color: #ffffff;
+        }
+
+        .dark-mode .table-bordered {
+            border-color: #444;
+        }
+
+        .dark-mode .table-bordered th, .dark-mode .table-bordered td {
+            border-color: #444;
+        }
+    </style>
+
+    <!-- Dark Mode Toggle Button -->
+    <button id="darkModeToggle" class="btn btn-secondary position-fixed top-0 end-0 m-3">
+        Toggle Dark Mode
+    </button>
+
+    <div class="container my-5 p-4 shadow rounded">
+        <div class="container p-4 shadow rounded">
+            <h2>Search</h2>
+            
+            <!-- Search Form -->
+            <form method="get" action="{% url 'weighted_search' %}" class="row g-3 align-items-center">
+                <!-- Search Input and Button -->
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" name="query" class="form-control" placeholder="Enter your search term..." value="{{ query }}">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            
+                <!-- Radio Buttons for Search Type -->
+                <div class="col-md-12">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="search_type" id="radio-topics" value="topics" {% if search_type == "topics" %}checked{% endif %}>
+                        <label class="form-check-label" for="radio-topics">Topics</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="search_type" id="radio-questions" value="questions" {% if search_type == "questions" %}checked{% endif %}>
+                        <label class="form-check-label" for="radio-questions">Questions</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="search_type" id="radio-combined" value="general" {% if search_type == "general" %}checked{% endif %}>
+                        <label class="form-check-label" for="radio-combined">General</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="search_type" id="radio-textonly" value="textonly" {% if search_type == "textonly" %}checked{% endif %}>
+                        <label class="form-check-label" for="radio-textonly">Text</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="listCategories" name="cat_search_Type" value="categories"  {% if search_type == "categories" %}checked{% endif %}> 
+                        <label class="form-check-label" for="listCategories"> List Categories</label>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if results %}
+        <!-- Results Table -->
+        <div id='result_div'>
+            <br><br><div> <b>Your Search Results Under</b> <span class="badge bg-danger"> {{ search_type }} category </span></div>
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Video Title Link</th>
+                            <th>Subheadings Link</th>                    
+                            <th>Topics</th>
+                            <th>Questions</th>                    
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td><a href="{{ result.match.url }}" target="_blank">{{ result.match.title|default:"No Title" }}</a></td>
+
+                            <!-- Display Subheadings -->
+                            <td>
+                                {% if result.match.subheadings.all %}
+                                    {% for subheading in result.match.subheadings.all %}
+                                        <a href="{% url 'subheading_detail' subheading.id %}" class="badge bg-primary text-decoration-none">
+                                            {{ subheading.title }}
+                                        </a><br>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No Subheadings</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Display Topics -->
+                            <td>
+                                {% if result.topics %}
+                                    {% for topic in result.topics %}
+                                        <span class="badge bg-warning">{{ topic.topic_title }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No Topics</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Display Questions -->
+                            <td>
+                                {% if result.questions %}
+                                    {% for question in result.questions %}
+                                        <span class="badge bg-info">{{ question.question_text }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No Questions</span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Actions Column -->
+                            <td>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-{{ result.match.id }}">Open</button>
+                            </td>
+                        </tr>
+
+                        <!-- Modal for Detailed View -->
+                        <div class="modal fade" id="modal-{{ result.match.id }}" tabindex="-1" aria-labelledby="modalLabel-{{ result.match.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="modalLabel-{{ result.match.id }}">{{ result.match.title|default:"No Title" }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Embedded YouTube Video -->
+                                        <div class="ratio ratio-16x9">
+                                            <iframe 
+                                                id="youtube-{{ result.match.id }}" class="youtube-video"
+                                                src="https://www.youtube.com/embed/{{ result.match.embed_url_id }}?enablejsapi=1"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowfullscreen>
+                                            </iframe>
+                                        </div>
+
+                                        <!-- Topics with Timestamps -->
+                                        <h6 class="mt-3">Topics with Timestamps</h6>
+                                        <div class="border border-info rounded p-2">
+                                            {% if result.topics %}
+                                                {% for topic in result.topics %}
+                                                <span class="badge bg-primary">
+                                                    {% if topic.youtube_timestamp %}
+                                                        <span class="timestamp"
+                                                              data-time="{{ topic.youtube_timestamp }}"
+                                                              data-iframe="youtube-{{ result.match.id }}">
+                                                            {{ topic.youtube_timestamp }} 
+                                                        </span>
+                                                    {% endif %}
+                                                    {{ topic.topic_title }}
+                                                </span><br>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p class="text-muted">No Topics</p>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Questions with Timestamps -->
+                                        <h6 class="mt-3">Questions with Timestamps</h6>
+                                        <div class="border border-info rounded p-2">
+                                            {% if result.questions %}
+                                                {% for question in result.questions %}
+                                                <span class="badge bg-info">
+                                                    {% if question.youtube_timestamp %}
+                                                        <span class="timestamp"
+                                                              data-time="{{ question.youtube_timestamp }}"
+                                                              data-iframe="youtube-{{ result.match.id }}">
+                                                            {{ question.youtube_timestamp }}
+                                                        </span>
+                                                    {% endif %}
+                                                    {{ question.question_text }}
+                                                </span><br>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p class="text-muted">No Questions</p>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Subheadings -->
+                                        <h6 class="mt-3">Subheadings</h6>
+                                        <div class="border border-primary rounded p-2">
+                                            {% if result.match.subheadings.all %}
+                                                {% for subheading in result.match.subheadings.all %}
+                                                    <a href="{% url 'subheading_detail' subheading.id %}" class="badge bg-primary text-decoration-none">
+                                                        {{ subheading.title }}
+                                                    </a><br>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p class="text-muted">No Subheadings</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% elif results_text_only %}
+        <!-- Text-Only Results -->
+        <div id="text_div_to_hide">
+            <br><br><div> <b>Your Search Results Under</b> <span class="badge bg-danger"> {{ search_type }} </span></div><br>
+            
+            <ul class="list-group">
+                {% for result in results_text_only %}
+                <li class="list-group-item result-card">
+                    <!-- Breadcrumb Navigation -->
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                {% if result.type == "chapter" %}
+                                {{ result.breadcrumbs }}
+                                {% elif result.type == "subheading" %}
+                                <a href="{% url 'subheading_detail' result.id %}">{{ result.breadcrumbs }}</a>
+                                {% endif %}
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {{ result.title }}
+                            </li>
+                        </ol>
+                    </nav>
+
+                    <!-- Title -->
+                    <h5>
+                        {% if result.type == "subheading" %}
+                        <a href="{% url 'subheading_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a>
+                        {% endif %}
+                    </h5>
+
+                    <!-- Description -->
+                    <p>
+                        {{ result.headline|safe|truncatewords:50 }}
+                    </p>
+
+                    <!-- YouTube Links -->
+                    {% if result.youtube_links %}           
+                    <span class="badge bg-secondary"> Classes: {{ result.count }} </span>    
+                    {% endif %}  
+                </li>
+                {% endfor %}
+            </ul>
+        </div>   
+
+        {% else %}
+        <!-- No Results Found -->
+        <div id="divtohide">
+            <p class="text-muted mt-4">No results! Search Something Else</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        const players = {}; // Store player instances
+
+        // Initialize YouTube API dynamically
+        function onYouTubeIframeAPIReady() {
+            document.querySelectorAll('iframe.youtube-video').forEach(iframe => {
+                const iframeId = iframe.getAttribute('id');
+                players[iframeId] = new YT.Player(iframeId);  // Initialize players for all iframe videos
+            });
+        }
+        
+        // Handle timestamp clicks
+        document.addEventListener('click', (event) => {
+            if (event.target.classList.contains('timestamp')) {
+                const time = event.target.getAttribute('data-time');
+                const iframeId = event.target.getAttribute('data-iframe'); // Get the iframe ID associated with this timestamp
+        
+                // Split the time string (HH:MM:SS) and convert it into total seconds
+                const [hours, minutes, seconds] = time.split(':').map(Number);
+                const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+        
+                // If the iframe corresponding to this timestamp exists, seek to the specified time
+                if (players[iframeId]) {
+                    players[iframeId].seekTo(totalSeconds, true); // Seek to the exact time
+                    players[iframeId].playVideo();  // Play the video after seeking
+                }
+            }
+        });
+        
+        // Dynamically load YouTube API script
+        const script = document.createElement('script');
+        script.src = "https://www.youtube.com/iframe_api";
+        document.body.appendChild(script);
+        
+        // Stop video playback when modal is closed
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('hidden.bs.modal', () => {
+                const iframe = modal.querySelector('iframe.youtube-video');
+                if (iframe && players[iframe.id]) {
+                    players[iframe.id].stopVideo();  // Stop video when the modal is closed
+                }
+            });
+        });
+
+        // Dark Mode Toggle Script
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const body = document.body;
+
+            // Check localStorage for dark mode preference
+            const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+
+            // Apply dark mode if enabled
+            if (isDarkMode) {
+                body.classList.add('dark-mode');
+            }
+
+            // Toggle dark mode on button click
+            darkModeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-mode');
+                const isEnabled = body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isEnabled ? 'enabled' : 'disabled');
+            });
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+{% endblock %} {% endcomment %}
+
+
+
+
+
+
+
+
+
+
+{% block content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weighted Search</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        /* Styling for result cards */
+        .result-card {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+        }
+
+        /* Styling for breadcrumb navigation */
+        .breadcrumb {
+            background-color: #e3d9bc;
+            border-radius: 5px;
+            padding: 8px 15px;
+        }
+
+        .breadcrumb-item a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Styling for YouTube links list */
+        .youtube-links {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .youtube-links li {
+            margin-bottom: 5px;
+        }
+
+        .badge-category {
+            cursor: pointer;
+            margin: 5px;
+        }
+        .table-container {
+            margin-top: 20px;
+        }
+        body {
+            background-color: #f8f9fa;
+        }
+
+
+
+
+        /* Dark mode styles */
+        .dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .dark-mode .container {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .dark-mode .result-card {
+            background-color: #2d2d2d;
+            border-color: #444;
+        }
+
+        .dark-mode .breadcrumb {
+            background-color: #333;
+        }
+        .dark-mode .breadcrumb-item{
+            color: #ffffff;
+
+        }
+
+        .dark-mode .badge {
+            color: #fff;
+        }
+
+        .dark-mode .modal-content {
+            background-color: #2d2d2d;
+            color: #ffffff;
+        }
+
+        .dark-mode .modal-header, .dark-mode .modal-footer {
+            border-color: #444;
+        }
+
+        .dark-mode .table {
+            color: #ffffff;
+        }
+
+        .dark-mode .table-bordered {
+            border-color: #444;
+        }
+
+        .dark-mode .table-bordered th, .dark-mode .table-bordered td {
+            border-color: #444;
+        }
+
+        .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h5, .dark-mode p {
+            color: #e0e0e0;
+        }
+        .dark-mode .text-muted {
+            color: #a0a0a0 !important;
+        }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 102px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #007bff;
+            border: none;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background-color: #0056b3;
+        }
+    </style>
+
+    <!-- Dark Mode Toggle Button -->
+  <!-- Dark Mode Toggle Button -->
+  <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</button>
+
+
+
+    
+<div class="container my-5 p-4 shadow rounded">
+    <div class="container p-4 shadow rounded">
+    <h2>Search</h2>
+    
+    <!-- Search Form -->
+    <form method="get" action="{% url 'weighted_search' %}" class="row g-3 align-items-center">
+        <!-- Search Input and Button -->
+        <div class="col-md-8">
+            <div class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Enter your search term..." value="{{ query }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    
+        <!-- Radio Buttons for Search Type -->
+        <div class="col-md-12">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-topics" value="topics" {% if search_type == "topics" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-topics">Topics</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-questions" value="questions" {% if search_type == "questions" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-questions">Questions</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-combined" value="general" {% if search_type == "general" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-combined">General</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="search_type" id="radio-textonly" value="textonly" {% if search_type == "textonly" %}checked{% endif %}>
+                <label class="form-check-label" for="radio-textonly">Text</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="listCategories" name="cat_search_Type" value="categories"  {% if search_type == "categories" %}checked{% endif %}> 
+                <label class="form-check-label" for="listCategories"> List Categories</label>
+            </div>
+            
+        </div>
+    </form>
+</div>
+
+
+        {% comment %} <div> Your Serach Results Under <span class="badge bg-danger"> {{ search_type }} category </span></div> {% endcomment %}
+        <div class="container my-5">
+        <!-- Category Badges -->
+        <div id="categoriesContainer" class="mb-4"></div> 
+    
+        <!-- Table for YouTube Links -->
+        <div id="youtubeLinksContainer" class="table-container table-responsive"></div>
+    </div>  
+
+
+    
+
+    {% if results %}
+    <!-- Results Table -->
+    <div id='result_div'>
+    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }} category </span></div>
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Video Title link</th>
+                    <th>Subheadings Link</th>                    
+                    <th>Topics</th>
+                    <th>Questions</th>                    
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    {% comment %} <td>{{ result.match.title|default:"No Title" }}</td> {% endcomment %}
+                    <td><a href="{{ result.match.url }}" target="_blank">{{ result.match.title|default:"No Title" }}</a></td>
+
+                    <!-- Display Subheadings -->
+                    <td>
+                        {% if result.match.subheadings.all %}
+                            {% for subheading in result.match.subheadings.all %}
+                                <a href="{% url 'subheading_detail' subheading.id %}" class="badge bg-primary text-decoration-none">
+                                    {{ subheading.title }}
+                                </a><br>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">No Subheadings</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Display Topics -->
+                    <td>
+                        {% if result.topics %}
+                            {% for topic in result.topics %}
+                                <span class="badge bg-warning">{{ topic.topic_title }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">No Topics</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Display Questions -->
+                    <td>
+                        {% if result.questions %}
+                            {% for question in result.questions %}
+                                <span class="badge bg-info">{{ question.question_text }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">No Questions</span>
+                        {% endif %}
+                    </td>
+
+                    
+
+                    <!-- Actions Column -->
+                    <td>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-{{ result.match.id }}">Open</button>
+                    </td>
+                </tr>
+
+                <!-- Modal for Detailed View -->
+                <div class="modal fade" id="modal-{{ result.match.id }}" tabindex="-1" aria-labelledby="modalLabel-{{ result.match.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalLabel-{{ result.match.id }}">{{ result.match.title|default:"No Title" }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Embedded YouTube Video -->
+                                <div class="ratio ratio-16x9">
+                                    <iframe 
+                                        id="youtube-{{ result.match.id }}" class="youtube-video"
+                                        src="https://www.youtube.com/embed/{{ result.match.embed_url_id }}?enablejsapi=1"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen>
+                                    </iframe>
+                                </div>
+
+                                <!-- Topics with Timestamps -->
+                                <h6 class="mt-3">Topics with Timestamps</h6>
+                                <div class="border border-info rounded p-2">
+                                    {% if result.topics %}
+                                        {% for topic in result.topics %}
+                                        <span class="badge bg-primary">
+                                            {% if topic.youtube_timestamp %}
+                                                <span class="timestamp"
+                                                      data-time="{{ topic.youtube_timestamp }}"
+                                                      data-iframe="youtube-{{ result.match.id }}">
+                                                    {{ topic.youtube_timestamp }} 
+                                                </span>
+                                            {% endif %}
+                                            {{ topic.topic_title }}
+                                        </span><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No Topics</p>
+                                    {% endif %}
+                                </div>
+
+<!-- Questions with Timestamps -->
+                                <h6 class="mt-3">Questions with Timestamps</h6>
+                                <div class="border border-info rounded p-2">
+                                    {% if result.questions %}
+                                        {% for question in result.questions %}
+                                        <span class="badge bg-info">
+                                            {% if question.youtube_timestamp %}
+                                                <span class="timestamp"
+                                                      data-time="{{ question.youtube_timestamp }}"
+                                                      data-iframe="youtube-{{ result.match.id }}">
+                                                    {{ question.youtube_timestamp }}
+                                                </span>
+                                            {% endif %}
+                                            {{ question.question_text }}
+                                        </span><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No Questions</p>
+                                    {% endif %}
+                                </div>
+                                
+
+
+
+
+                                <!-- Subheadings -->
+                                <h6 class="mt-3">Subheadings</h6>
+                                <div class="border border-primary rounded p-2">
+                                    {% if result.match.subheadings.all %}
+                                        {% for subheading in result.match.subheadings.all %}
+                                            <a href="{% url 'subheading_detail' subheading.id %}" class="badge bg-primary text-decoration-none">
+                                                {{ subheading.title }}
+                                            </a><br>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No Subheadings</p>
+                                    {% endif %}
+                                </div>
+
+
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% elif results_text_only %}
+    <!-- Text-Only Results -->
+    <div id="text_div_to_hide">
+    <div> <b>Your Serach Results Under</b> <span class="badge bg-danger"> {{ search_type }} category </span></div><br>
+    
+    <ul class="list-group">
+        {% for result in results_text_only %}
+        <li class="list-group-item result-card">
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        {% if result.type == "chapter" %}
+                        {{ result.breadcrumbs }}
+                        {% elif result.type == "subheading" %}
+                        <a href="{% url 'subheading_detail' result.id %}">{{ result.breadcrumbs }}</a>
+                        {% endif %}
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        {{ result.title }}
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- Title -->
+            <h5>
+                {% comment %} {% if result.type == "chapter" %}
+                <a href="{% url 'chapter_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a> {% endcomment %}
+                {% if result.type == "subheading" %}
+                <a href="{% url 'subheading_detail' result.id %}" class="text-decoration-none">{{ result.title }}</a>
+                {% endif %}
+            </h5>
+
+            <!-- Description -->
+            <p>
+                {{ result.headline|safe|truncatewords:50 }}
+            </p>
+
+            <!-- YouTube Links -->
+           {% if result.youtube_links %}           
+            <span class="badge bg-secondary"> Classes: {{ result.count }} </span>    
+           {% endif %}  
+        </li>
+        {% endfor %}
+    </ul>
+    
+    </div>   
+
+
+
+
+    
+
+    
+    
+
+    
+    {% else %}
+    <!-- No Results Found -->
+    <div id="divtohide">
+    <p class="text-muted mt-4">No results! Search Something Else</p>
+    </div>
+    {% endif %}
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+<script>
+    const players = {}; // Store player instances
+
+    // Initialize YouTube API dynamically
+    function onYouTubeIframeAPIReady() {
+        document.querySelectorAll('iframe.youtube-video').forEach(iframe => {
+            const iframeId = iframe.getAttribute('id');
+            players[iframeId] = new YT.Player(iframeId);  // Initialize players for all iframe videos
+        });
+    }
+    
+    // Handle timestamp clicks
+    document.addEventListener('click', (event) => {
+        if (event.target.classList.contains('timestamp')) {
+            const time = event.target.getAttribute('data-time');
+            const iframeId = event.target.getAttribute('data-iframe'); // Get the iframe ID associated with this timestamp
+    
+            // Split the time string (HH:MM:SS) and convert it into total seconds
+            const [hours, minutes, seconds] = time.split(':').map(Number);
+            const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    
+            // If the iframe corresponding to this timestamp exists, seek to the specified time
+            if (players[iframeId]) {
+                players[iframeId].seekTo(totalSeconds, true); // Seek to the exact time
+                players[iframeId].playVideo();  // Play the video after seeking
+            }
+        }
+    });
+    
+    // Dynamically load YouTube API script
+    const script = document.createElement('script');
+    script.src = "https://www.youtube.com/iframe_api";
+    document.body.appendChild(script);
+    
+    // Stop video playback when modal is closed
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', () => {
+            const iframe = modal.querySelector('iframe.youtube-video');
+            if (iframe && players[iframe.id]) {
+                players[iframe.id].stopVideo();  // Stop video when the modal is closed
+            }
+        });
+    });
+    
+</script>
+
+
+
+   
+
+
+
+
+<script>
+    $(document).ready(function () {
+        // Handle List Categories Checkbox
+        $('#listCategories').on('change', function () {
+            if (this.checked) {
+                $.ajax({
+                    url: '/categories/',
+                    type: 'GET',
+                    success: function (data) {
+                        const categoriesContainer = $('#categoriesContainer');
+                        const divtohide = $('#divtohide');
+                        const result_div = $('#result_div');
+                        const text_div_to_hide = $('#text_div_to_hide');
+                        divtohide.hide();
+                        result_div.hide();
+                        text_div_to_hide.hide();
+                        categoriesContainer.empty();
+                        categoriesContainer.css({
+                            'border': '1px solid #007bff',
+                            'padding': '10px',
+                            'border-radius': '5px'
+                        });
+
+                        data.categories.forEach(category => {
+                            categoriesContainer.append(
+                                `<span class="badge bg-primary badge-category" data-category="${category.id}">${category.category}   </span>`
+                            );
+                        });
+                    },
+                    error: function () {
+                        alert('Error fetching categories');
+                    }
+                });
+            } else {
+                $('#categoriesContainer').empty();
+                $('#youtubeLinksContainer').empty();
+                $('#categoriesContainer').css({
+                    'border': '',
+                    'padding': '',
+                    'border-radius': ''
+                }).empty();
+                
+            }
+        });
+
+        // Handle Category Badge Click
+        $(document).on('click', '.badge-category', function () {
+            const categoryId = $(this).data('category');
+            
+            // Send AJAX request to fetch YouTube links for the category
+            $.ajax({
+                url: `/youtube-links/${categoryId}/`,
+                type: 'GET',
+                success: function (data) {
+                    const youtubeLinksContainer = $('#youtubeLinksContainer');
+                    youtubeLinksContainer.empty(); // Clear existing content
+        
+                    // Start table structure
+                    let tableHtml = `
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    {% comment %} <th>Open</th> {% endcomment %}
+                                    <th>Subheadings</th>
+                                    <th>Topics</th>
+                                    <th>Questions</th>                                    
+                                    <th>Class Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+        
+                    // Loop through each YouTube link returned from the server
+                    data.youtube_links.forEach(link => {
+                        // Add each link to the table
+                        tableHtml += `
+                            <tr>
+                                {% comment %} <td>
+                                    <button class="btn btn-primary open-modal-btn" data-bs-toggle="modal" data-bs-target="#modal-${link.id}">Open</button>
+                                </td> {% endcomment %}
+                                <td>
+                                    ${link.subheadings.map(subheading => `<a href="/subheading/${subheading.id}" class="badge bg-secondary">${subheading.title}</a>`).join('<br>')}
+                                </td>                                
+
+
+                                <td>
+                                    ${link.topics.map(topic => `<span class="badge bg-warning">${topic.topic}</span>`).join(' ')}
+                                </td>
+                                <td>
+                                    ${link.questions.map(question => `<span class="badge bg-info">${question.question_text}</span>`).join(' ')}
+                                </td>
+                                                                <td>
+                                    <a href="${link.url}" target="_blank">${link.title || 'No Title'}</a>
+                                </td>
+
+                            </tr>
+                        `;
+        
+                        // Add a modal for each link
+                        tableHtml += `
+                            <div class="modal fade" id="modal-${link.id}" tabindex="-1" aria-labelledby="modalLabel-${link.id}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modalLabel-${link.id}">${link.title || 'No Title'}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Embedded Video -->
+                                            <h6>Video</h6>
+                                            <div class="ratio ratio-16x9">
+                                                <iframe
+                                                    id="youtube-${link.id}" class="youtube-video"
+                                                    src="https://www.youtube.com/embed/${link.embed_url_id}?enablejsapi=1"
+                                                    frameborder="0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowfullscreen>
+                                                </iframe>
+                                            </div>
+        
+                                            <!-- Topics with Timestamps -->
+                                            <h6 class="mt-4">Topics</h6>
+                                            <div class="border border-info rounded p-2">
+                                                ${link.topics.map(topic => {
+                                                    const timestamp = topic.youtube_timestamp ? `<span class="timestamp" data-time="${topic.youtube_timestamp}">${topic.youtube_timestamp}</span>` : '';
+                                                    return `<span class="badge bg-primary">${timestamp} ${topic.topic}</span><br>`;
+                                                }).join('')}
+                                            </div>
+        
+                                            <!-- Questions with Timestamps -->
+                                            <h6 class="mt-4">Questions</h6>
+                                            <div class="border border-info rounded p-2">
+                                                ${link.questions.map(question => {
+                                                    const timestamp = question.youtube_timestamp ? `<span class="timestamp" data-time="${question.youtube_timestamp}">${question.youtube_timestamp}</span>` : '';
+                                                    return `<span class="badge bg-info">${timestamp} ${question.question_text}</span><br>`;
+                                                }).join('')}
+                                            </div>
+        
+                                            <!-- Description -->
+                                            <h6 class="mt-4">Description</h6>
+                                            <div class="border border-success rounded p-2">
+                                                <p>${link.description || 'No Description'}</p>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+        
+                    // Close the table and append to the container
+                    tableHtml += `</tbody></table>`;
+                    youtubeLinksContainer.append(tableHtml);
+                },
+                error: function () {
+                    alert('Error fetching YouTube links');
+                }
+            });
+        });
+           
+
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+
+    // Check localStorage for dark mode preference
+    const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+
+    // Apply dark mode if enabled
+    if (isDarkMode) {
+        body.classList.add('dark-mode');
+    }
+
+    // Toggle dark mode on button click
+    darkModeToggle.addEventListener('click', function() {
+        body.classList.toggle('dark-mode');
+        const isEnabled = body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isEnabled ? 'enabled' : 'disabled');
+    });
+});
+
+
+function toggleDarkMode() {
+    const body = document.body;
+    body.classList.toggle("dark-mode");
+
+    const darkModeToggle = document.querySelector(".dark-mode-toggle");
+    if (body.classList.contains("dark-mode")) {
+        darkModeToggle.textContent = "☀️";
+    } else {
+        darkModeToggle.textContent = "🌙";
+    }
+}
+
+</script>
+
+
+{% endblock %}
+
+
