@@ -15,35 +15,91 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
+
+
+
+
+
+
+
 <div class="mt-5">
     <div class="row justify-content-center">
-        
-        <!-- Profile Column -->
-        <div class="col-md-3 col-sm-6 p-4 mt-2 rounded shadow text-center">
-            {% if user.socialaccount_set.all %}
-                {% for socialaccount in user.socialaccount_set.all %}
-                    <img src="{{ socialaccount.get_avatar_url }}" class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
-                {% endfor %}
-            {% else %}
-                <img src="{% static 'images/default-profile.png' %}" class="rounded-circle mb-3" width="120" height="120" alt="Default Profile">
-            {% endif %}
-            
+        <div class="col-md-3 col-sm-6 p-4 rounded shadow text-center mt-2">
+            <h2>Your Profile</h2>
+
+            <img src="{{ profile.profile_picture|default:'https://via.placeholder.com/120' }}" 
+                 class="rounded-circle mb-3" width="120" height="120" alt="Profile Picture">
+
             <h4>{{ user.get_full_name|default:user.username }}</h4>
             <p class="text-muted">{{ user.email }}</p>
-            
+            <p class="text-muted"><strong>Bio:</strong> {{ profile.bio|default:"Not set yet" }}</p>
+
             <a href="{% url 'account_logout' %}" class="btn btn-danger">Logout</a>
+
+            <!-- Centered Dark Mode Toggle -->
+            <div class="d-flex justify-content-center align-items-center mt-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="darkModeToggle">
+                    <label class="form-check-label" for="darkModeToggle"> Dark Theme</label>
+                </div>
+            </div>
         </div>
 
-        <!-- Vertical Divider -->
         <div class="col-auto d-flex align-items-center">
             <div class="vertical-hr"></div>
         </div>
 
-        <!-- Additional Column -->
-        <div class="col-md-6 col-sm-12 p-4 mt-2 rounded shadow">
-            <h3 class="text-center">Additional Information</h3>
-            <p class="text-muted text-center">This section can include user details, BooksMarks, questions asked on webite etc. </p>
+        <div class="col-md-6 col-sm-12 p-4 rounded shadow text-center mt-2">
+            <h3>Bookmarks</h3>
+            <ul>
+                {% for bookmark in profile.bookmarks %}
+                    <li>{{ bookmark }}</li>
+                {% empty %}
+                    <p>No bookmarks added yet.</p>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </div>
+
+
+
+  <script>
+
+  // Function to toggle dark mode
+  function toggleDarkMode() {
+    const htmlElement = document.documentElement; // Use <html> instead of <body>
+    htmlElement.classList.toggle("dark-mode");
+  
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    if (htmlElement.classList.contains("dark-mode")) {
+      darkModeToggle.checked = true; // Check the switch for dark mode
+      localStorage.setItem("darkMode", "enabled");
+    } else {
+      darkModeToggle.checked = false; // Uncheck the switch for light mode
+      localStorage.setItem("darkMode", "disabled");
+    }
+  }
+  
+  // Check localStorage for dark mode preference on page load
+  document.addEventListener("DOMContentLoaded", function () {
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const isDarkMode = localStorage.getItem("darkMode") === "enabled";
+  
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark-mode"); // Apply to <html>
+      darkModeToggle.checked = true;
+    } else {
+      document.documentElement.classList.remove("dark-mode"); // Remove from <html>
+      darkModeToggle.checked = false;
+    }
+  
+    // Add event listener to the toggle switch
+    darkModeToggle.addEventListener("change", toggleDarkMode);
+  });
+</script>
+
+
+  
+
 {% endblock %}

@@ -10,8 +10,15 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from .models import Book, Chapter, Subheading, YouTubeLink, Category
 from django.contrib.auth.decorators import login_required
+from .models import Profile
 
 
+
+
+@login_required
+def account_profile(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    return render(request, 'account/profile.html', {'profile': profile})
 
 
 @login_required

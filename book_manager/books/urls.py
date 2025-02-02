@@ -29,6 +29,8 @@ urlpatterns = [
     path('youtube-links/question/<str:question_text>/', get_youtube_links_by_question, name='get_youtube_links_by_question'),  # New route for questions
     path('profile/', account_profile, name='account_profile'),
 
+   
+
 ]
 
 

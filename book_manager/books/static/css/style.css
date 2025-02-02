@@ -261,23 +261,81 @@
             color: #d4d4d4 !important;
         }
 
-        /* Dark Mode Toggle Button */
-        .dark-mode-toggle {
-            position: fixed;
-            top: 700px;
-            right: 20px;
-            z-index: 1000;
-            background-color: #007bff;
-            border: none;
-            color: #ffffff;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+       
 
-        .dark-mode-toggle:hover {
-            background-color: #0056b3;
-        }
 
+
+        /* Default (Light Mode) Styles */
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            transition: all 0.3s ease;
+        }
+        .navbar {
+            background-color: #343a40;
+            color: #fff;
+          }
+    
+
+    
+        .dark-mode .navbar {
+          background-color: #1e1e1e;
+          
+      }
+    
+    
+      navbar-brand {
+        color: #ffffff;
+    
+      }
+
+    
+      
+      .dark-mode body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    .dark-mode .container {
+        background-color: #1e1e1e;
+    }
+
+    .dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode h5 {
+        color: #e0e0e0;
+    }
+
+    .dark-mode .accordion {
+        background-color: #1e1e1e;
+
+    }
+
+    /* Accordion Container */
+    .dark-mode .accordion {
+        background-color: #1e1e1e; /* Dark background */
+    color: #f8f9fa; /* Light text */
+}
+
+/* Accordion Items */
+.dark-mode .accordion-item {
+    background-color: #1e1e1e;
+    border: 1px solid #495057; /* Border color */
+}
+
+/* Accordion Header */
+.dark-mode .accordion-button {
+    background-color: #1e1e1e;
+    color: #f8f9fa; /* Light text */
+    border: none;
+    box-shadow: none;
+}
+
+.dark-mode .numColor{
+    color: #f8f9fa; /* Light text */
+}
+
+        
+
+
+
+        
 

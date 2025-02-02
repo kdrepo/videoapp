@@ -221,7 +221,7 @@
 
 
 from django.contrib import admin
-from .models import Book, Chapter, Subheading, YouTubeLink, Category, Topic, Question
+from .models import Book, Chapter, Subheading, YouTubeLink, Category, Topic, Question, Profile
 from import_export.admin import ImportExportModelAdmin
 
 # Base Admin Classes
@@ -285,3 +285,4 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Topic, TopicAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(YouTubeLink, YouTubeLinkAdmin)
+admin.site.register(Profile)

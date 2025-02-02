@@ -1,6 +1,18 @@
 from django.db import models
 from django.contrib.postgres.search import SearchVectorField
 from django.db.models import Index
+from django.contrib.auth.models import User
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_picture = models.URLField(blank=True, null=True)  # Stores Google Profile Picture URL
+    bookmarks = models.JSONField(default=list)  # Store bookmarks as JSON
+    bio = models.TextField(blank=True, null=True)  # User bio
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
 
 
 class Book(models.Model):
