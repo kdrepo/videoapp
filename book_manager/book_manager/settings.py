@@ -107,7 +107,7 @@ AUTHENTICATION_BACKENDS = [
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Redirect to home page after login
-LOGIN_REDIRECT_URL = '/profile'
+LOGIN_REDIRECT_URL = '/profile/'
 
 # Don't ask for username, use email instead
 ACCOUNT_EMAIL_REQUIRED = True
